@@ -1,0 +1,251 @@
+// ClinoCash — Prisma Schema
+// Double-entry bookkeeping ledger with multi-currency support
+// Designed for PCI-DSS compliance and financial accuracy
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ─────────────────────────────────────────────
+
+enum Currency {
+  GHS // Ghanaian Cedi
+  XOF // CFA Franc (West African)
+  USD // US Dollar
+}
+
+enum KycTier {
+  TIER_0 // Unverified — limited transactions
+  TIER_1 // Phone + ID verified
+  TIER_2 // Full KYC (address, selfie)
+}
+
+enum TransactionType {
+  P2P_TRANSFER
+  CASH_IN
+  CASH_OUT
+  BANK_TO_WALLET
+  WALLET_TO_BANK
+  PAYMENT_REQUEST
+  CURRENCY_EXCHANGE
+  FEE
+  REVERSAL
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REVERSED
+  EXPIRED
+}
+
+enum PaymentRequestStatus {
+  PENDING
+  PAID
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+enum WalletStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+}
+
+enum LedgerEntryType {
+  DEBIT
+  CREDIT
+}
+
+// ─── USER ──────────────────────────────────────────────
+
+model User {
+  id              String    @id @default(uuid())
+  phone           String    @unique
+  email           String?   @unique
+  username        String    @unique
+  displayName     String
+  avatarUrl       String?
+  pinHash         String    // AES-256 encrypted PIN hash
+  biometricKey    String?   // Public key for biometric auth
+  kycTier         KycTier   @default(TIER_0)
+  locale          String    @default("en") // "en" or "fr"
+  isActive        Boolean   @default(true)
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  wallets              Wallet[]
+  sentTransactions     Transaction[]    @relation("SenderTransactions")
+  receivedTransactions Transaction[]    @relation("ReceiverTransactions")
+  sentRequests         PaymentRequest[] @relation("RequesterRelation")
+  receivedRequests     PaymentRequest[] @relation("PayerRelation")
+  otpCodes             OtpCode[]
+  auditLogs            AuditLog[]
+
+  @@index([phone])
+  @@index([username])
+  @@map("users")
+}
+
+// ─── OTP ───────────────────────────────────────────────
+
+model OtpCode {
+  id        String   @id @default(uuid())
+  userId    String?
+  phone     String
+  code      String   // Hashed OTP
+  purpose   String   // "LOGIN", "REGISTER", "TRANSACTION"
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([phone, purpose])
+  @@map("otp_codes")
+}
+
+// ─── WALLET ────────────────────────────────────────────
+
+model Wallet {
+  id        String       @id @default(uuid())
+  userId    String
+  currency  Currency
+  balance   Decimal      @default(0) @db.Decimal(19, 4)
+  status    WalletStatus @default(ACTIVE)
+  version   Int          @default(0) // Optimistic locking
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id])
+  ledgerEntries LedgerEntry[]
+
+  @@unique([userId, currency])
+  @@index([userId])
+  @@map("wallets")
+}
+
+// ─── TRANSACTION (Immutable Record) ────────────────────
+
+model Transaction {
+  id               String            @id @default(uuid())
+  reference        String            @unique @default(uuid()) // Public reference
+  idempotencyKey   String?           @unique // Prevent duplicate submissions
+  type             TransactionType
+  status           TransactionStatus @default(PENDING)
+  senderUserId     String?
+  receiverUserId   String?
+  senderWalletId   String?
+  receiverWalletId String?
+  amount           Decimal           @db.Decimal(19, 4)
+  fee              Decimal           @default(0) @db.Decimal(19, 4)
+  currency         Currency
+  exchangeRate     Decimal?          @db.Decimal(19, 8)
+  description      String?
+  metadata         Json?             // Flexible: gateway ref, MoMo number, etc.
+  failureReason    String?
+  reversalOf       String?           // Reference to reversed transaction
+  createdAt        DateTime          @default(now())
+  completedAt      DateTime?
+
+  sender   User? @relation("SenderTransactions", fields: [senderUserId], references: [id])
+  receiver User? @relation("ReceiverTransactions", fields: [receiverUserId], references: [id])
+
+  ledgerEntries LedgerEntry[]
+
+  @@index([senderUserId])
+  @@index([receiverUserId])
+  @@index([reference])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+// ─── LEDGER ENTRY (Double-Entry Bookkeeping) ───────────
+
+model LedgerEntry {
+  id            String          @id @default(uuid())
+  transactionId String
+  walletId      String
+  entryType     LedgerEntryType // DEBIT or CREDIT
+  amount        Decimal         @db.Decimal(19, 4)
+  balanceBefore Decimal         @db.Decimal(19, 4)
+  balanceAfter  Decimal         @db.Decimal(19, 4)
+  createdAt     DateTime        @default(now())
+
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+  wallet      Wallet      @relation(fields: [walletId], references: [id])
+
+  @@index([transactionId])
+  @@index([walletId])
+  @@map("ledger_entries")
+}
+
+// ─── PAYMENT REQUEST ───────────────────────────────────
+
+model PaymentRequest {
+  id          String               @id @default(uuid())
+  requesterId String
+  payerId     String?
+  payerPhone  String?              // Can request from non-users
+  amount      Decimal              @db.Decimal(19, 4)
+  currency    Currency
+  message     String?
+  status      PaymentRequestStatus @default(PENDING)
+  expiresAt   DateTime
+  paidAt      DateTime?
+  createdAt   DateTime             @default(now())
+
+  requester User  @relation("RequesterRelation", fields: [requesterId], references: [id])
+  payer     User? @relation("PayerRelation", fields: [payerId], references: [id])
+
+  @@index([requesterId])
+  @@index([payerId])
+  @@map("payment_requests")
+}
+
+// ─── EXCHANGE RATE ─────────────────────────────────────
+
+model ExchangeRate {
+  id           String   @id @default(uuid())
+  fromCurrency Currency
+  toCurrency   Currency
+  rate         Decimal  @db.Decimal(19, 8)
+  source       String   @default("manual") // "manual", "api", "provider"
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
+
+  @@unique([fromCurrency, toCurrency])
+  @@map("exchange_rates")
+}
+
+// ─── AUDIT LOG (Immutable) ─────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String   // "TRANSFER", "LOGIN", "KYC_UPDATE", etc.
+  entity    String   // "Transaction", "Wallet", "User"
+  entityId  String
+  details   Json?    // Before/after state
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

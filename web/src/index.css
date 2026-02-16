@@ -1,0 +1,306 @@
+/* ═══════════════════════════════════════════════════════
+   ClinoCash — Global Design System
+   Theme: Modern-Minimalist Fintech
+   ═══════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ─── CSS CUSTOM PROPERTIES ─────────────────────────── */
+
+:root {
+  /* Primary Palette */
+  --navy-darkest: #000D1A;
+  --navy-dark: #001A33;
+  --navy: #002244;
+  --navy-medium: #003366;
+  --navy-light: #0A4080;
+
+  /* Accent */
+  --cyan: #00E5FF;
+  --cyan-glow: #00E5FF60;
+  --cyan-light: #66F0FF;
+  --cyan-dark: #00B8CC;
+  --cyan-muted: #00E5FF20;
+
+  /* Status Colors */
+  --green: #00D68F;
+  --green-glow: #00D68F40;
+  --red: #FF3D71;
+  --red-glow: #FF3D7140;
+  --yellow: #FFAA00;
+  --yellow-glow: #FFAA0040;
+  --purple: #8B5CF6;
+  --purple-glow: #8B5CF640;
+
+  /* Neutrals */
+  --white: #FFFFFF;
+  --gray-50: #F7F8FA;
+  --gray-100: #E8ECF0;
+  --gray-200: #C5CDD8;
+  --gray-300: #8F9BB3;
+  --gray-400: #6B7A99;
+  --gray-500: #4A5568;
+  --gray-600: #2D3748;
+  --gray-700: #1A2332;
+  --gray-800: #111B27;
+  --gray-900: #0A1118;
+
+  /* Surfaces */
+  --surface-bg: var(--navy-darkest);
+  --surface-card: rgba(0, 26, 51, 0.7);
+  --surface-card-hover: rgba(0, 34, 68, 0.8);
+  --surface-elevated: rgba(0, 40, 80, 0.5);
+  --surface-glass: rgba(0, 229, 255, 0.05);
+  --surface-overlay: rgba(0, 13, 26, 0.85);
+
+  /* Borders */
+  --border-subtle: rgba(0, 229, 255, 0.08);
+  --border-default: rgba(0, 229, 255, 0.15);
+  --border-strong: rgba(0, 229, 255, 0.3);
+  --border-focus: var(--cyan);
+
+  /* Typography */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.3125rem;
+  --text-2xl: 1.625rem;
+  --text-3xl: 2rem;
+  --text-4xl: 2.5rem;
+  --text-5xl: 3.25rem;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 50px;
+  --radius-full: 50%;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 16px 50px rgba(0, 0, 0, 0.6);
+  --shadow-cyan: 0 0 20px rgba(0, 229, 255, 0.15);
+  --shadow-cyan-strong: 0 0 40px rgba(0, 229, 255, 0.25);
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+
+  /* Z-Index */
+  --z-dropdown: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+  --z-tooltip: 400;
+}
+
+/* ─── RESET ─────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-primary);
+  background: var(--surface-bg);
+  color: var(--white);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle animated background grid */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0, 229, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(0, 229, 255, 0.02) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--cyan);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+a:hover {
+  color: var(--cyan-light);
+}
+
+button {
+  font-family: var(--font-primary);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+input, textarea, select {
+  font-family: var(--font-primary);
+  outline: none;
+  border: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+/* ─── SCROLLBAR ─────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--navy-darkest);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--navy-medium);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cyan-dark);
+}
+
+/* ─── UTILITY CLASSES ───────────────────────────────── */
+
+.text-cyan { color: var(--cyan); }
+.text-green { color: var(--green); }
+.text-red { color: var(--red); }
+.text-yellow { color: var(--yellow); }
+.text-muted { color: var(--gray-300); }
+.text-white { color: var(--white); }
+
+.font-mono { font-family: var(--font-mono); }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+
+/* ─── ANIMATIONS ────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px var(--cyan-glow), 0 0 10px var(--cyan-glow); }
+  50% { box-shadow: 0 0 20px var(--cyan-glow), 0 0 40px var(--cyan-glow); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ripple {
+  to { transform: scale(4); opacity: 0; }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in { animation: fadeIn var(--duration-base) var(--ease-out); }
+.animate-fade-in-up { animation: fadeInUp var(--duration-slow) var(--ease-out); }
+.animate-scale-in { animation: scaleIn var(--duration-base) var(--ease-spring); }
+.animate-pulse { animation: pulse 2s infinite; }
+
+/* Staggered animation delays */
+.delay-1 { animation-delay: 50ms; }
+.delay-2 { animation-delay: 100ms; }
+.delay-3 { animation-delay: 150ms; }
+.delay-4 { animation-delay: 200ms; }
+.delay-5 { animation-delay: 250ms; }
+.delay-6 { animation-delay: 300ms; }
