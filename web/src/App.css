@@ -54,12 +54,12 @@
 }
 
 .header-logo {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
   border-radius: var(--radius-md);
   transition: transform var(--duration-base) var(--ease-spring);
-  filter: drop-shadow(0 0 6px rgba(0, 200, 83, 0.3));
+  filter: drop-shadow(0 0 8px rgba(0, 200, 83, 0.35));
 }
 
 .header-logo:hover {
@@ -246,7 +246,7 @@
 .balance-card {
   background: linear-gradient(135deg, var(--navy-medium) 0%, var(--navy-dark) 50%, var(--navy) 100%);
   border-radius: var(--radius-xl);
-  padding: var(--space-xl);
+  padding: var(--space-lg) var(--space-xl);
   position: relative;
   overflow: hidden;
   border: 1px solid var(--border-default);
@@ -293,7 +293,7 @@
 }
 
 .balance-amount {
-  font-size: var(--text-4xl);
+  font-size: var(--text-3xl);
   font-weight: 800;
   color: var(--white);
   letter-spacing: -0.02em;
