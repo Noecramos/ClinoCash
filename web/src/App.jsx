@@ -719,7 +719,7 @@ function CardsPage({ locale, user }) {
     <div className="cards-page">
       <div className="virtual-card">
         <div className="card-header">
-          <img src="/logo.png" alt="ClinoCash" style={{ height: '28px', filter: 'brightness(1.2)' }} />
+          <img src="/logo.png" alt="ClinoCash" style={{ height: '40px', filter: 'brightness(1.2)' }} />
           <div className="card-chip" />
         </div>
         <div className="card-number">•••• •••• •••• 4821</div>

@@ -54,8 +54,8 @@
 }
 
 .header-logo {
-  width: 52px;
-  height: 52px;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
   border-radius: var(--radius-md);
   transition: transform var(--duration-base) var(--ease-spring);
