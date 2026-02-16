@@ -4,18 +4,48 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/logo.png" />
+  <link rel="manifest" href="/manifest.json" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="description"
     content="ClinoCash — Fast, secure peer-to-peer payments for Ghana and Togo. Send money, top up mobile money, and manage multi-currency wallets." />
-  <meta name="theme-color" content="#001A33" />
+  <meta name="theme-color" content="#00C853" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ClinoCash" />
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="ClinoCash — Send Money Instantly" />
+  <meta property="og:description"
+    content="Fast, secure P2P payments for Ghana & Togo. Multi-currency wallets, Mobile Money, bank transfers." />
+  <meta property="og:image" content="https://clinocash.vercel.app/logo.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:url" content="https://clinocash.vercel.app" />
+  <meta property="og:site_name" content="ClinoCash" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="ClinoCash — Send Money Instantly" />
+  <meta name="twitter:description"
+    content="Fast, secure P2P payments for Ghana & Togo. Multi-currency wallets, Mobile Money, bank transfers." />
+  <meta name="twitter:image" content="https://clinocash.vercel.app/logo.png" />
+
   <title>ClinoCash — Send Money Instantly</title>
 </head>
 
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
+  <script>
+    // Register Service Worker for PWA install prompt
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => { });
+      });
+    }
+  </script>
 </body>
 
 </html>

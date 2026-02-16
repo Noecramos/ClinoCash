@@ -810,6 +810,29 @@ function App() {
   const [selectedCurrency, setSelectedCurrency] = useState('GHS');
   const [showSendModal, setShowSendModal] = useState(false);
   const [balanceHidden, setBalanceHidden] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  // Listen for PWA install prompt
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstallBanner(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const result = await installPrompt.userChoice;
+    if (result.outcome === 'accepted') {
+      setShowInstallBanner(false);
+    }
+    setInstallPrompt(null);
+  };
 
   const tabs = [
     { id: 'home', label: t('home', locale), icon: Icons.home },
@@ -868,6 +891,23 @@ function App() {
           </button>
         </div>
       </header>
+
+      {/* PWA Install Banner */}
+      {showInstallBanner && (
+        <div className="install-banner" id="install-banner">
+          <img src="/favicon.png" alt="ClinoCash" className="install-banner-icon" />
+          <div className="install-banner-text">
+            <strong>{locale === 'fr' ? 'Installer ClinoCash' : 'Install ClinoCash'}</strong>
+            <span>{locale === 'fr' ? 'Ajoutez à votre écran d\'accueil' : 'Add to your home screen'}</span>
+          </div>
+          <button className="install-banner-btn" onClick={handleInstall}>
+            {locale === 'fr' ? 'Installer' : 'Install'}
+          </button>
+          <button className="install-banner-close" onClick={() => setShowInstallBanner(false)}>
+            {Icons.close}
+          </button>
+        </div>
+      )}
 
       {/* Content */}
       <main className="app-content">

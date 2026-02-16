@@ -1,0 +1,28 @@
+{
+    "name": "ClinoCash",
+    "short_name": "ClinoCash",
+    "description": "Fast, secure peer-to-peer payments for Ghana and Togo. Send money, top up mobile money, and manage multi-currency wallets.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#060E0A",
+    "theme_color": "#00C853",
+    "orientation": "portrait",
+    "categories": [
+        "finance",
+        "utilities"
+    ],
+    "icons": [
+        {
+            "src": "/favicon.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}
