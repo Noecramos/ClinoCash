@@ -719,7 +719,7 @@ function CardsPage({ locale, user }) {
     <div className="cards-page">
       <div className="virtual-card">
         <div className="card-header">
-          <div className="card-logo">Clino<span>Cash</span></div>
+          <img src="/logo.png" alt="ClinoCash" style={{ height: '28px', filter: 'brightness(1.2)' }} />
           <div className="card-chip" />
         </div>
         <div className="card-number">•••• •••• •••• 4821</div>
@@ -852,7 +852,7 @@ function App() {
       {/* Header */}
       <header className="app-header">
         <div className="header-left">
-          <div className="header-avatar">{MOCK_USER.avatarInitials}</div>
+          <img src="/logo.png" alt="ClinoCash" className="header-logo" />
           <div className="header-greeting">
             <span>{getGreeting(locale)}</span>
             <span>{MOCK_USER.displayName.split(' ')[0]}</span>
