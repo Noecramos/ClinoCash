@@ -1,4 +1,4 @@
-// ClinoCash — Localization System (EN/FR)
+// ClinoCash — Localization System (EN/FR/EE/TW/HA)
 
 const translations = {
     en: {
@@ -122,6 +122,39 @@ const translations = {
         qrCode: 'QR Code',
         barcode: 'Barcode',
         clinocashId: 'ClinoCash ID',
+
+        // PIN Lock
+        enterPin: 'Enter PIN',
+        pinSubtitle: 'Enter your 4-digit PIN to continue',
+        wrongPin: 'Incorrect PIN. Try again.',
+        useBiometrics: 'Use Fingerprint',
+        forgotPin: 'Forgot PIN?',
+
+        // Transaction Detail
+        transactionDetail: 'Transaction Details',
+        referenceNumber: 'Reference Number',
+        dateTime: 'Date & Time',
+        from: 'From',
+        to: 'To',
+        status: 'Status',
+        shareReceipt: 'Share Receipt',
+        downloadReceipt: 'Download Receipt',
+        reportIssue: 'Report an Issue',
+        transactionType: 'Type',
+
+        // NFC Tap to Pay
+        tapToPay: 'Tap to Pay',
+        tapToPayDesc: 'Hold your phone near the terminal',
+        readyToPay: 'Ready to Pay',
+        nfcActive: 'NFC Active',
+        paymentAmount: 'Payment Amount',
+
+        // Savings
+        savings: 'Savings',
+        findAgent: 'Find an Agent',
+        nearbyAgents: 'Nearby cash-in / cash-out points',
+        theme: 'Theme',
+        monthlySummary: 'Monthly Summary',
     },
 
     fr: {
@@ -245,6 +278,360 @@ const translations = {
         qrCode: 'Code QR',
         barcode: 'Code-barres',
         clinocashId: 'ID ClinoCash',
+
+        // PIN Lock
+        enterPin: 'Entrer le NIP',
+        pinSubtitle: 'Entrez votre NIP à 4 chiffres pour continuer',
+        wrongPin: 'NIP incorrect. Réessayez.',
+        useBiometrics: 'Utiliser l\'empreinte',
+        forgotPin: 'NIP oublié ?',
+
+        // Transaction Detail
+        transactionDetail: 'Détails de la Transaction',
+        referenceNumber: 'Numéro de Référence',
+        dateTime: 'Date et Heure',
+        from: 'De',
+        to: 'À',
+        status: 'Statut',
+        shareReceipt: 'Partager le Reçu',
+        downloadReceipt: 'Télécharger le Reçu',
+        reportIssue: 'Signaler un Problème',
+        transactionType: 'Type',
+
+        // NFC
+        tapToPay: 'Paiement sans contact',
+        tapToPayDesc: 'Approchez votre téléphone du terminal',
+        readyToPay: 'Prêt à payer',
+        nfcActive: 'NFC Actif',
+        paymentAmount: 'Montant du paiement',
+
+        // Savings
+        savings: 'Épargne',
+        findAgent: 'Trouver un Agent',
+        nearbyAgents: 'Points de dépôt/retrait proches',
+        theme: 'Thème',
+        monthlySummary: 'Résumé Mensuel',
+    },
+
+    // ─── EWE (Eʋegbe) ────────────────────────────────────
+    ee: {
+        greeting: 'Ŋdi',
+        greetingAfternoon: 'Ŋdɔ',
+        greetingEvening: 'Fiɛyi',
+
+        totalBalance: 'Ga Blibo',
+        thisMonth: 'Ɣleti sia',
+
+        send: 'Dɔ',
+        receive: 'Xɔ',
+        topUp: 'Kpe Ɖe',
+        more: 'Bubuwo',
+
+        home: 'Aƒeme',
+        activity: 'Dɔwɔwɔ',
+        scan: 'Scan',
+        cards: 'Kadiwo',
+        profile: 'Ŋutɔ',
+
+        recentTransactions: 'Dɔwɔwɔ Yeye',
+        viewAll: 'Kpɔ Katã',
+        received: 'Xɔ',
+        sent: 'Dɔ',
+        completed: 'Vɔ',
+        pending: 'Le Edzi',
+        failed: 'Mekpɔ Edzi O',
+        today: 'Egbe',
+        yesterday: 'Etsɔ',
+        noTransactions: 'Dɔwɔwɔ aɖeke meli o',
+        noTransactionsDesc: 'Wò dɔwɔwɔ ƒe ɖoɖo ava afisia',
+
+        sendMoney: 'Dɔ Ga',
+        recipient: 'Amesi Xɔ',
+        amount: 'Ga Ƒe Nuwuwu',
+        continue: 'Yi Edzi',
+        confirmSend: 'Ɖo Edzi & Dɔ',
+        fee: 'Fe',
+        total: 'Blibo',
+        sendSuccess: 'Ga la dɔ!',
+        sending: 'Le Dɔm...',
+
+        requestMoney: 'Bia Ga',
+        requestFrom: 'Bia tso',
+
+        virtualCard: 'Kadi',
+        cardHolder: 'Kadi Ƒe Amea',
+        validThru: 'Vaɖe',
+        getCard: 'Xɔ Wò Kadi',
+        getCardDesc: 'Zã ClinoCash kadi le internet dzi',
+
+        personalInfo: 'Ŋutɔ Ƒe Nyawo',
+        security: 'Deɖiɖi',
+        language: 'Gbe',
+        notifications: 'Nyanyadodo',
+        linkedAccounts: 'Akawnt Siwo',
+        helpSupport: 'Kpekpeɖeŋu',
+        logout: 'Tso Mɛ',
+        kycVerified: 'Ɖo Edzi',
+        kycPending: 'Le Ɖoɖo Me',
+
+        promoTitle: 'Ɖo Xɔlɔ̃wo Ƒu, Xɔ Nuɖuɖu',
+        promoDesc: 'Xɔ GH₵ 5 na xɔlɔ̃ ɖesiaɖe',
+
+        all: 'Katã',
+        incoming: 'Vava',
+        outgoing: 'Yiyia',
+        cashIn: 'Ga Vava',
+        cashOut: 'Ga Yiyia',
+
+        payBills: 'Xe Fe',
+        electricity: 'Kanea',
+        water: 'Tsi',
+        internet: 'Internet',
+        airtime: 'Airtime',
+        back: 'Trɔ',
+
+        enterPin: 'De PIN',
+        pinSubtitle: 'De wò PIN 4 ƒe be nàyi edzi',
+        wrongPin: 'PIN la mesɔ o',
+        useBiometrics: 'Zã Asibidɛ',
+        forgotPin: 'Ŋkume le wò PIN?',
+
+        transactionDetail: 'Dɔwɔwɔ Ƒe Nyawo',
+        referenceNumber: 'Tɔtrɔ Ƒe Xexlẽme',
+        dateTime: 'Ŋkeke Kple Gaƒoƒo',
+        from: 'Tso',
+        to: 'Yi',
+        status: 'Nɔnɔme',
+        shareReceipt: 'Ma Reçu',
+        downloadReceipt: 'Dɔwn Reçu',
+        reportIssue: 'Ɖo Nya',
+        transactionType: 'Tata',
+
+        tapToPay: 'Ka bo Xe',
+        tapToPayDesc: 'Tsɔ fon la ɖo terminal la nu',
+        readyToPay: 'Sẽsẽ bo Axe',
+        nfcActive: 'NFC Le Dzi',
+        paymentAmount: 'Ga Nuwuwu',
+
+        savings: 'Ga Ɖɔɖɔ',
+        findAgent: 'Di Agent',
+        nearbyAgents: 'Ga ɖɔɖɔ teƒewo',
+        theme: 'Tata',
+        monthlySummary: 'Ɣleti Ƒe Ɖoɖo',
+    },
+
+    // ─── TWI (Akan-Twi) ───────────────────────────────────
+    tw: {
+        greeting: 'Maakye',
+        greetingAfternoon: 'Maaha',
+        greetingEvening: 'Maadwo',
+
+        totalBalance: 'Sika Nyinaa',
+        thisMonth: 'Bosome yi',
+
+        send: 'Mena',
+        receive: 'Gye',
+        topUp: 'Hyɛ So',
+        more: 'Nea Ɛka',
+
+        home: 'Fie',
+        activity: 'Adwumayɛ',
+        scan: 'Scan',
+        cards: 'Kaadi',
+        profile: 'Wo Ho',
+
+        recentTransactions: 'Adwuma Foforɔ',
+        viewAll: 'Hwɛ Nyinaa',
+        received: 'Gyee',
+        sent: 'Menae',
+        completed: 'Awie',
+        pending: 'Ɛreyɛ',
+        failed: 'Annkɔ Yiye',
+        today: 'Ɛnnɛ',
+        yesterday: 'Ɛnnora',
+        noTransactions: 'Adwuma biara nni hɔ',
+        noTransactionsDesc: 'Wo adwuma ahyɛnsoɔ bɛba ha',
+
+        sendMoney: 'Mena Sika',
+        recipient: 'Obi a Ɔbɛgye',
+        amount: 'Sika Dodow',
+        continue: 'Toa So',
+        confirmSend: 'Hyɛ Mu Den & Mena',
+        fee: 'Akatua',
+        total: 'Nyinaa',
+        sendSuccess: 'Sika no akɔ!',
+        sending: 'Ɛremena...',
+
+        requestMoney: 'Srɛ Sika',
+        requestFrom: 'Srɛ firi',
+
+        virtualCard: 'Kaadi',
+        cardHolder: 'Kaadi Wura',
+        validThru: 'Kɔsi',
+        getCard: 'Nya Wo Kaadi',
+        getCardDesc: 'Fa ClinoCash kaadi di dwuma wɔ intanɛt so',
+
+        personalInfo: 'Wo Ho Nsɛm',
+        security: 'Ahotew',
+        language: 'Kasa',
+        notifications: 'Nkrado',
+        linkedAccounts: 'Account ahorow',
+        helpSupport: 'Mmoa',
+        logout: 'Fi mu',
+        kycVerified: 'Yɛahyɛ mu den',
+        kycPending: 'Ɛreyɛ',
+
+        promoTitle: 'Frɛ Wo Nnamfonom, Nya Akyɛde',
+        promoDesc: 'Nya GH₵ 5 ma adamfo biara',
+
+        all: 'Nyinaa',
+        incoming: 'Ɛreba',
+        outgoing: 'Ɛrekɔ',
+        cashIn: 'Sika Ba',
+        cashOut: 'Sika Kɔ',
+
+        payBills: 'Tua Ka',
+        electricity: 'Kanea',
+        water: 'Nsuo',
+        internet: 'Internet',
+        airtime: 'Airtime',
+        back: 'San',
+
+        enterPin: 'Hyɛ PIN',
+        pinSubtitle: 'Hyɛ wo PIN nɔma 4 na toa so',
+        wrongPin: 'PIN no nyɛ papa',
+        useBiometrics: 'Fa Nsateaa',
+        forgotPin: 'Wo PIN awera wo?',
+
+        transactionDetail: 'Adwuma Ho Nsɛm',
+        referenceNumber: 'Nɔma a Ɛkyerɛ',
+        dateTime: 'Da ne Bere',
+        from: 'Firi',
+        to: 'Kɔ',
+        status: 'Gyinabea',
+        shareReceipt: 'Kyɛ Reçu',
+        downloadReceipt: 'Download Reçu',
+        reportIssue: 'Ka Ɔhaw',
+        transactionType: 'Ɔkwan',
+
+        tapToPay: 'Ka na Tua',
+        tapToPayDesc: 'Fa wo fon bɛn terminal no',
+        readyToPay: 'Sɛsɛw sɛ Ɛtua',
+        nfcActive: 'NFC Wɔ Mu',
+        paymentAmount: 'Sika Dodow',
+
+        savings: 'Sika a Wɔakora',
+        findAgent: 'Hwehwɛ Agent',
+        nearbyAgents: 'Sika ɖeɖe bea ahorow',
+        theme: 'Su',
+        monthlySummary: 'Bosome yi mu',
+    },
+
+    // ─── HAUSA ────────────────────────────────────────────
+    ha: {
+        greeting: 'Ina kwana',
+        greetingAfternoon: 'Barka da rana',
+        greetingEvening: 'Barka da yamma',
+
+        totalBalance: 'Jimlar Kuɗi',
+        thisMonth: 'Wannan watan',
+
+        send: 'Aika',
+        receive: 'Karɓa',
+        topUp: 'Ƙara',
+        more: 'Ƙari',
+
+        home: 'Gida',
+        activity: 'Aiki',
+        scan: 'Duba',
+        cards: 'Katin',
+        profile: 'Bayani',
+
+        recentTransactions: 'Sabbin Harkokin',
+        viewAll: 'Duba Duka',
+        received: 'An Karɓa',
+        sent: 'An Aika',
+        completed: 'An Gama',
+        pending: 'Ana Jira',
+        failed: 'Ya Kasa',
+        today: 'Yau',
+        yesterday: 'Jiya',
+        noTransactions: 'Babu aiki tukuna',
+        noTransactionsDesc: 'Tarihin aikinka zai bayyana a nan',
+
+        sendMoney: 'Aika Kuɗi',
+        recipient: 'Mai Karɓa',
+        amount: 'Adadin Kuɗi',
+        continue: 'Ci Gaba',
+        confirmSend: 'Tabbatar & Aika',
+        fee: 'Kuɗin Hidima',
+        total: 'Jimla',
+        sendSuccess: 'An aika kuɗin!',
+        sending: 'Ana aikawa...',
+
+        requestMoney: 'Neman Kuɗi',
+        requestFrom: 'Nema daga',
+
+        virtualCard: 'Katin Dijital',
+        cardHolder: 'Mai Katin',
+        validThru: 'Har zuwa',
+        getCard: 'Sami Katinka',
+        getCardDesc: 'Yi amfani da katin ClinoCash don biyan kuɗi',
+
+        personalInfo: 'Bayanin Kai',
+        security: 'Tsaro',
+        language: 'Harshe',
+        notifications: 'Sanarwa',
+        linkedAccounts: 'Asusun da aka Haɗa',
+        helpSupport: 'Taimako',
+        logout: 'Fita',
+        kycVerified: 'An Tabbatar',
+        kycPending: 'Ana Jira Tabbatarwa',
+
+        promoTitle: 'Gayyaci Abokai, Sami Lada',
+        promoDesc: 'Sami GH₵ 5 ga kowane aboki',
+
+        all: 'Duka',
+        incoming: 'Mai shigowa',
+        outgoing: 'Mai fitowa',
+        cashIn: 'Kuɗi Shiga',
+        cashOut: 'Kuɗi Fita',
+
+        payBills: 'Biya Kuɗi',
+        electricity: 'Wutar Lantarki',
+        water: 'Ruwa',
+        internet: 'Intanet',
+        airtime: 'Airtime',
+        back: 'Komawa',
+
+        enterPin: 'Shigar da PIN',
+        pinSubtitle: 'Shigar da lambar PIN ɗinka mai lamba 4',
+        wrongPin: 'PIN din bai dace ba',
+        useBiometrics: 'Yi amfani da Yatsa',
+        forgotPin: 'An manta da PIN?',
+
+        transactionDetail: 'Cikakken Bayani',
+        referenceNumber: 'Lambar Tunani',
+        dateTime: 'Rana da Lokaci',
+        from: 'Daga',
+        to: 'Zuwa',
+        status: 'Matsayi',
+        shareReceipt: 'Raba Rasiti',
+        downloadReceipt: 'Sauke Rasiti',
+        reportIssue: 'Rahoto Matsala',
+        transactionType: 'Iri',
+
+        tapToPay: 'Taɓa don Biya',
+        tapToPayDesc: 'Kusantar da wayarka zuwa na\'urar',
+        readyToPay: 'A Shirye don Biya',
+        nfcActive: 'NFC Yana Aiki',
+        paymentAmount: 'Adadin Kuɗi',
+
+        savings: 'Ajiya',
+        findAgent: 'Nemo Wakili',
+        nearbyAgents: 'Wuraren ajiyar kuɗi kusa',
+        theme: 'Jigo',
+        monthlySummary: 'Taƙaitaccen Watan',
     },
 };
 

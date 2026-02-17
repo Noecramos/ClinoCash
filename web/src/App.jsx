@@ -3,6 +3,17 @@ import './App.css';
 import { t, getGreeting, formatCurrency, formatCurrencyParts } from './i18n';
 import { Html5Qrcode } from 'html5-qrcode';
 
+// ─── HAPTIC FEEDBACK ───────────────────────────────────
+
+const haptic = (pattern = 10) => {
+  try { navigator.vibrate?.(pattern); } catch (e) { /* silent */ }
+};
+
+const hapticClick = (callback) => (e) => {
+  haptic(10);
+  callback?.(e);
+};
+
 // ─── MOCK DATA ─────────────────────────────────────────
 
 const MOCK_USER = {
@@ -590,7 +601,7 @@ function QuickActions({ locale, onSendClick, onPayBillsClick, onRequestClick, on
   );
 }
 
-function TransactionItem({ txn, locale }) {
+function TransactionItem({ txn, locale, onTxnClick }) {
   const iconClass = txn.direction === 'received'
     ? (txn.type === 'CASH_IN' ? 'topup' : 'received')
     : (txn.status === 'PENDING' ? 'pending' : 'sent');
@@ -604,7 +615,7 @@ function TransactionItem({ txn, locale }) {
   const statusText = t(txn.status.toLowerCase(), locale);
 
   return (
-    <div className="transaction-item" id={`txn-${txn.id}`}>
+    <div className="transaction-item" id={`txn-${txn.id}`} onClick={hapticClick(() => onTxnClick?.(txn))} style={{ cursor: 'pointer' }}>
       <div className={`transaction-icon ${iconClass}`}>{icon}</div>
       <div className="transaction-details">
         <div className="transaction-name">{txn.name}</div>
@@ -624,7 +635,7 @@ function TransactionItem({ txn, locale }) {
   );
 }
 
-function TransactionList({ transactions, locale }) {
+function TransactionList({ transactions, locale, onTxnClick }) {
   if (transactions.length === 0) {
     return (
       <div className="empty-state">
@@ -638,7 +649,7 @@ function TransactionList({ transactions, locale }) {
   return (
     <div className="transaction-list">
       {transactions.map(txn => (
-        <TransactionItem key={txn.id} txn={txn} locale={locale} />
+        <TransactionItem key={txn.id} txn={txn} locale={locale} onTxnClick={onTxnClick} />
       ))}
     </div>
   );
@@ -803,7 +814,7 @@ function SendMoneyModal({ onClose, locale, wallets }) {
 
 // ─── PAGES ─────────────────────────────────────────────
 
-function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick, onRequestClick, onSavingsClick, onFindAgent, selectedCurrency, onCurrencyChange, balanceHidden, onToggleBalance }) {
+function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick, onRequestClick, onSavingsClick, onFindAgent, onTxnClick, selectedCurrency, onCurrencyChange, balanceHidden, onToggleBalance }) {
   return (
     <>
       <BalanceCard
@@ -820,8 +831,8 @@ function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick,
       <div className="agent-banner" onClick={onFindAgent}>
         <div className="agent-banner-icon">{Icons.mapPin}</div>
         <div className="agent-banner-content">
-          <div className="agent-banner-title">{locale === 'fr' ? 'Trouver un Agent' : 'Find an Agent'}</div>
-          <div className="agent-banner-desc">{locale === 'fr' ? 'Points de dépôt/retrait proches' : 'Nearby cash-in / cash-out points'}</div>
+          <div className="agent-banner-title">{t('findAgent', locale)}</div>
+          <div className="agent-banner-desc">{t('nearbyAgents', locale)}</div>
         </div>
         <div className="agent-banner-arrow">{Icons.chevronRight}</div>
       </div>
@@ -835,12 +846,12 @@ function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick,
         <button className="section-link">{t('viewAll', locale)}</button>
       </div>
 
-      <TransactionList transactions={transactions.slice(0, 5)} locale={locale} />
+      <TransactionList transactions={transactions.slice(0, 5)} locale={locale} onTxnClick={onTxnClick} />
     </>
   );
 }
 
-function ActivityPage({ locale, transactions }) {
+function ActivityPage({ locale, transactions, onTxnClick }) {
   const [filter, setFilter] = useState('all');
   const filters = ['all', 'incoming', 'outgoing', 'cashIn', 'cashOut'];
 
@@ -878,7 +889,7 @@ function ActivityPage({ locale, transactions }) {
       {Object.entries(groups).map(([date, txns]) => (
         <div key={date} className="activity-date-group">
           <div className="activity-date-label">{date}</div>
-          <TransactionList transactions={txns} locale={locale} />
+          <TransactionList transactions={txns} locale={locale} onTxnClick={onTxnClick} />
         </div>
       ))}
 
@@ -1331,6 +1342,24 @@ function CardsPage({ locale, user }) {
         </div>
       </div>
 
+      {/* NFC Tap to Pay */}
+      <div className="nfc-section">
+        <div className="nfc-animation">
+          <div className="nfc-waves">
+            <div className="nfc-wave"></div>
+            <div className="nfc-wave"></div>
+            <div className="nfc-wave"></div>
+          </div>
+          <div className="nfc-phone">📱</div>
+        </div>
+        <h3 className="nfc-title">{t('tapToPay', locale)}</h3>
+        <p className="nfc-desc">{t('tapToPayDesc', locale)}</p>
+        <div className="nfc-status">
+          <span className="nfc-status-dot"></span>
+          {t('nfcActive', locale)}
+        </div>
+      </div>
+
       <div className="promo-banner" style={{ marginTop: '24px' }}>
         <div className="promo-icon">{Icons.cards}</div>
         <div className="promo-content">
@@ -1352,6 +1381,9 @@ function ProfilePage({ locale, user, onLocaleChange, theme, onThemeChange }) {
         <div className="lang-toggle">
           <button className={`lang-option ${locale === 'en' ? 'active' : ''}`} onClick={() => onLocaleChange('en')}>EN</button>
           <button className={`lang-option ${locale === 'fr' ? 'active' : ''}`} onClick={() => onLocaleChange('fr')}>FR</button>
+          <button className={`lang-option ${locale === 'ee' ? 'active' : ''}`} onClick={() => onLocaleChange('ee')}>EE</button>
+          <button className={`lang-option ${locale === 'tw' ? 'active' : ''}`} onClick={() => onLocaleChange('tw')}>TW</button>
+          <button className={`lang-option ${locale === 'ha' ? 'active' : ''}`} onClick={() => onLocaleChange('ha')}>HA</button>
         </div>
       )
     },
@@ -1954,6 +1986,161 @@ function AgentLocator({ locale, onClose }) {
   );
 }
 
+// ─── TRANSACTION DETAIL MODAL ──────────────────────────
+
+function TransactionDetailModal({ txn, locale, onClose }) {
+  if (!txn) return null;
+
+  const refNumber = `TXN-${txn.id.toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+  const dateObj = new Date(txn.date);
+  const dateStr = dateObj.toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+  const timeStr = dateObj.toLocaleTimeString(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+    hour: '2-digit', minute: '2-digit'
+  });
+  const isReceived = txn.direction === 'received';
+  const amountPrefix = isReceived ? '+' : '-';
+  const amountClass = isReceived ? 'positive' : 'negative';
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="txn-detail-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>{t('transactionDetail', locale)}</h3>
+          <button className="modal-close" onClick={onClose}>{Icons.close}</button>
+        </div>
+
+        {/* Amount hero */}
+        <div className="txn-detail-hero">
+          <div className={`txn-detail-amount ${amountClass}`}>
+            {amountPrefix}{formatCurrency(txn.amount, txn.currency, locale)}
+          </div>
+          <div className={`txn-detail-status ${txn.status.toLowerCase()}`}>
+            {txn.status === 'COMPLETED' ? '✓' : txn.status === 'PENDING' ? '⏳' : '✗'} {t(txn.status.toLowerCase(), locale)}
+          </div>
+        </div>
+
+        {/* Details rows */}
+        <div className="txn-detail-rows">
+          <div className="txn-detail-row">
+            <span className="txn-detail-label">{t('transactionType', locale)}</span>
+            <span className="txn-detail-value">{isReceived ? t('received', locale) : t('sent', locale)}</span>
+          </div>
+          <div className="txn-detail-row">
+            <span className="txn-detail-label">{isReceived ? t('from', locale) : t('to', locale)}</span>
+            <span className="txn-detail-value">{txn.name} ({txn.username})</span>
+          </div>
+          <div className="txn-detail-row">
+            <span className="txn-detail-label">{t('dateTime', locale)}</span>
+            <span className="txn-detail-value">{dateStr}<br />{timeStr}</span>
+          </div>
+          <div className="txn-detail-row">
+            <span className="txn-detail-label">{t('referenceNumber', locale)}</span>
+            <span className="txn-detail-value txn-ref">{refNumber}</span>
+          </div>
+          {txn.fee > 0 && (
+            <div className="txn-detail-row">
+              <span className="txn-detail-label">{t('fee', locale)}</span>
+              <span className="txn-detail-value">{formatCurrency(txn.fee, txn.currency, locale)}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="txn-detail-actions">
+          <button className="btn-secondary" onClick={hapticClick(() => { })}>
+            {Icons.download} {t('downloadReceipt', locale)}
+          </button>
+          <button className="btn-secondary" onClick={hapticClick(() => { })}>
+            📤 {t('shareReceipt', locale)}
+          </button>
+          <button className="btn-outline-danger" onClick={hapticClick(() => { })}>
+            ⚠️ {t('reportIssue', locale)}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── PIN LOCK SCREEN ───────────────────────────────────
+
+function PinLockScreen({ locale, onUnlock }) {
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState(false);
+  const [shake, setShake] = useState(false);
+  const CORRECT_PIN = '1234';
+
+  const handleDigit = (digit) => {
+    haptic(10);
+    setError(false);
+    const newPin = pin + digit;
+    setPin(newPin);
+
+    if (newPin.length === 4) {
+      if (newPin === CORRECT_PIN) {
+        haptic([50, 30, 50]);
+        setTimeout(() => onUnlock(), 300);
+      } else {
+        haptic([100, 50, 100]);
+        setError(true);
+        setShake(true);
+        setTimeout(() => { setPin(''); setShake(false); }, 600);
+      }
+    }
+  };
+
+  const handleDelete = () => {
+    haptic(10);
+    setPin(pin.slice(0, -1));
+    setError(false);
+  };
+
+  const dots = [0, 1, 2, 3];
+
+  return (
+    <div className="pin-lock-screen">
+      <div className="pin-lock-content">
+        <img src="/logo.png" alt="ClinoCash" className="pin-logo" />
+        <h2 className="pin-title">{t('enterPin', locale)}</h2>
+        <p className="pin-subtitle">{t('pinSubtitle', locale)}</p>
+
+        {/* PIN dots */}
+        <div className={`pin-dots ${shake ? 'shake' : ''}`}>
+          {dots.map(i => (
+            <div key={i} className={`pin-dot ${i < pin.length ? 'filled' : ''} ${error ? 'error' : ''}`} />
+          ))}
+        </div>
+
+        {error && <p className="pin-error">{t('wrongPin', locale)}</p>}
+
+        {/* Numpad */}
+        <div className="pin-numpad">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+            <button key={n} className="pin-key" onClick={() => handleDigit(String(n))}>
+              {n}
+            </button>
+          ))}
+          <button className="pin-key pin-bio" onClick={hapticClick(onUnlock)}>
+            🔑
+          </button>
+          <button className="pin-key" onClick={() => handleDigit('0')}>
+            0
+          </button>
+          <button className="pin-key pin-delete" onClick={handleDelete}>
+            ⌫
+          </button>
+        </div>
+
+        <button className="pin-forgot" onClick={hapticClick(onUnlock)}>
+          {t('forgotPin', locale)}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── MAIN APP ──────────────────────────────────────────
 
 function App() {
@@ -1972,6 +2159,8 @@ function App() {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showSavingsPage, setShowSavingsPage] = useState(false);
   const [showInviteToast, setShowInviteToast] = useState(true);
+  const [pinLocked, setPinLocked] = useState(true);
+  const [selectedTxn, setSelectedTxn] = useState(null);
 
   // Apply theme to document
   useEffect(() => {
@@ -2026,6 +2215,7 @@ function App() {
             onRequestClick={() => setShowRequestModal(true)}
             onSavingsClick={() => setShowSavingsPage(true)}
             onFindAgent={() => setShowAgentLocator(true)}
+            onTxnClick={setSelectedTxn}
             selectedCurrency={selectedCurrency}
             onCurrencyChange={setSelectedCurrency}
             balanceHidden={balanceHidden}
@@ -2033,7 +2223,7 @@ function App() {
           />
         );
       case 'activity':
-        return <ActivityPage locale={locale} transactions={MOCK_TRANSACTIONS} />;
+        return <ActivityPage locale={locale} transactions={MOCK_TRANSACTIONS} onTxnClick={setSelectedTxn} />;
       case 'scan':
         return <ScanPage locale={locale} user={MOCK_USER} />;
       case 'cards':
@@ -2044,6 +2234,11 @@ function App() {
         return null;
     }
   };
+
+  // PIN Lock Screen
+  if (pinLocked && !showOnboarding) {
+    return <PinLockScreen locale={locale} onUnlock={() => setPinLocked(false)} />;
+  }
 
   return (
     <div className="app" id="clinocash-app">
@@ -2152,6 +2347,11 @@ function App() {
       {/* Savings Goals */}
       {showSavingsPage && (
         <SavingsGoalsPage locale={locale} onClose={() => setShowSavingsPage(false)} />
+      )}
+
+      {/* Transaction Detail */}
+      {selectedTxn && (
+        <TransactionDetailModal txn={selectedTxn} locale={locale} onClose={() => setSelectedTxn(null)} />
       )}
     </div>
   );
