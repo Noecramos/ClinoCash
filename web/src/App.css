@@ -1653,3 +1653,78 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* ─── CAMERA SCANNER ─────────────────────────────────── */
+
+.camera-active-container {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: var(--space-md);
+}
+
+.scanner-container {
+  width: 100%;
+  min-height: 300px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.scanner-container video {
+  border-radius: var(--radius-xl);
+}
+
+.scanner-container.barcode-scanner {
+  min-height: 220px;
+}
+
+.stop-scan-btn {
+  margin-top: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Scan result card */
+.scan-result-card {
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  text-align: center;
+  border: 1px solid rgba(0, 200, 83, 0.3);
+  animation: fadeInUp var(--duration-slow) var(--ease-out);
+}
+
+.scan-result-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-sm);
+}
+
+.scan-result-label {
+  font-size: var(--text-sm);
+  color: var(--gray-400);
+  margin-bottom: var(--space-xs);
+}
+
+.scan-result-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--cyan);
+  word-break: break-all;
+  padding: var(--space-sm);
+  background: var(--surface-bg);
+  border-radius: var(--radius-md);
+  margin: var(--space-sm) 0 var(--space-md);
+}
+
+.scan-error {
+  color: #EF4444;
+  font-size: var(--text-sm);
+  margin: var(--space-sm) 0;
+  padding: var(--space-sm);
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: var(--radius-md);
+}

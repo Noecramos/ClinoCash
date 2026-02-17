@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
 import { t, getGreeting, formatCurrency, formatCurrencyParts } from './i18n';
+import { Html5Qrcode } from 'html5-qrcode';
 
 // ─── MOCK DATA ─────────────────────────────────────────
 
@@ -956,6 +957,10 @@ function ScanPage({ locale, user }) {
   const [tab, setTab] = useState('qr'); // qr, barcode
   const [showMyQR, setShowMyQR] = useState(false);
   const [manualCode, setManualCode] = useState('');
+  const [scanning, setScanning] = useState(false);
+  const [scannedResult, setScannedResult] = useState(null);
+  const [cameraError, setCameraError] = useState(null);
+  const scannerInstanceRef = useRef(null);
 
   // Generate a deterministic QR-like matrix from user ID
   const qrMatrix = [];
@@ -973,14 +978,82 @@ function ScanPage({ locale, user }) {
     barcodeBars.push({ width: w, filled: i % 2 === 0 });
   }
 
+  // Cleanup scanner on unmount
+  useEffect(() => {
+    return () => {
+      if (scannerInstanceRef.current) {
+        scannerInstanceRef.current.stop().catch(() => { });
+        scannerInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  const startScanner = async (mode) => {
+    setCameraError(null);
+    setScannedResult(null);
+    setScanning(true);
+
+    // Wait for DOM to render the container
+    await new Promise(r => setTimeout(r, 150));
+
+    const containerId = 'scanner-container';
+    const el = document.getElementById(containerId);
+    if (!el) { setScanning(false); return; }
+
+    try {
+      const html5Qr = new Html5Qrcode(containerId);
+      scannerInstanceRef.current = html5Qr;
+
+      const config = {
+        fps: 10,
+        qrbox: mode === 'qr' ? { width: 220, height: 220 } : { width: 280, height: 100 },
+      };
+
+      await html5Qr.start(
+        { facingMode: 'environment' },
+        config,
+        (decodedText) => {
+          setScannedResult(decodedText);
+          html5Qr.stop().catch(() => { });
+          scannerInstanceRef.current = null;
+          setScanning(false);
+        },
+        () => { }
+      );
+    } catch (err) {
+      console.error('Camera error:', err);
+      setCameraError(
+        locale === 'fr'
+          ? 'Impossible d\'accéder à la caméra. Vérifiez les permissions.'
+          : 'Unable to access camera. Please check permissions.'
+      );
+      setScanning(false);
+    }
+  };
+
+  const stopScanner = async () => {
+    if (scannerInstanceRef.current) {
+      try { await scannerInstanceRef.current.stop(); } catch (e) { }
+      scannerInstanceRef.current = null;
+    }
+    setScanning(false);
+  };
+
+  const handleTabSwitch = async (newTab) => {
+    await stopScanner();
+    setScannedResult(null);
+    setCameraError(null);
+    setTab(newTab);
+  };
+
   return (
     <div className="scan-page">
       {/* Tab switcher */}
       <div className="scan-tabs">
-        <button className={`scan-tab ${tab === 'qr' ? 'active' : ''}`} onClick={() => setTab('qr')}>
+        <button className={`scan-tab ${tab === 'qr' ? 'active' : ''}`} onClick={() => handleTabSwitch('qr')}>
           {Icons.qrcode} <span>{t('qrCode', locale)}</span>
         </button>
-        <button className={`scan-tab ${tab === 'barcode' ? 'active' : ''}`} onClick={() => setTab('barcode')}>
+        <button className={`scan-tab ${tab === 'barcode' ? 'active' : ''}`} onClick={() => handleTabSwitch('barcode')}>
           {Icons.barcodeScan} <span>{t('barcode', locale)}</span>
         </button>
       </div>
@@ -988,7 +1061,6 @@ function ScanPage({ locale, user }) {
       {tab === 'qr' ? (
         <div className="scan-content">
           {showMyQR ? (
-            /* ─── My QR Code ─── */
             <div className="my-qr-section">
               <div className="qr-display-card">
                 <img src="/logo.png" alt="ClinoCash" style={{ width: '36px', height: '36px', marginBottom: '8px' }} />
@@ -1014,67 +1086,115 @@ function ScanPage({ locale, user }) {
               </div>
             </div>
           ) : (
-            /* ─── Scan QR ─── */
             <div className="scan-viewfinder-section">
-              <div className="scan-viewfinder">
-                <div className="viewfinder-corner tl" /><div className="viewfinder-corner tr" />
-                <div className="viewfinder-corner bl" /><div className="viewfinder-corner br" />
-                <div className="viewfinder-line" />
-                <div className="viewfinder-icon">{Icons.scan}</div>
-              </div>
-              <p className="scan-hint">{locale === 'fr' ? 'Alignez le code QR dans le cadre' : 'Point camera at a QR code'}</p>
-              <div className="scan-actions">
-                <button className="btn-pill btn-primary" style={{ width: 'auto', padding: '12px 24px' }}>
-                  {Icons.scan} {t('scanQR', locale)}
-                </button>
-                <button className="btn-pill btn-secondary" style={{ width: 'auto', padding: '12px 24px' }} onClick={() => setShowMyQR(true)}>
-                  {t('myQRCode', locale)}
-                </button>
-              </div>
+              {scanning ? (
+                <div className="camera-active-container">
+                  <div id="scanner-container" className="scanner-container" />
+                  <button className="btn-pill btn-secondary stop-scan-btn" onClick={stopScanner}>
+                    {Icons.close} {locale === 'fr' ? 'Arrêter' : 'Stop'}
+                  </button>
+                </div>
+              ) : scannedResult ? (
+                <div className="scan-result-card">
+                  <div className="scan-result-icon">✅</div>
+                  <div className="scan-result-label">{locale === 'fr' ? 'Code détecté' : 'Code detected'}</div>
+                  <div className="scan-result-value">{scannedResult}</div>
+                  <div className="scan-actions">
+                    <button className="btn-pill btn-primary" style={{ width: 'auto', padding: '12px 24px' }} onClick={() => startScanner('qr')}>
+                      {Icons.scan} {locale === 'fr' ? 'Scanner à nouveau' : 'Scan again'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="scan-viewfinder" onClick={() => startScanner('qr')} style={{ cursor: 'pointer' }}>
+                    <div className="viewfinder-corner tl" /><div className="viewfinder-corner tr" />
+                    <div className="viewfinder-corner bl" /><div className="viewfinder-corner br" />
+                    <div className="viewfinder-line" />
+                    <div className="viewfinder-icon">{Icons.scan}</div>
+                  </div>
+                  {cameraError && <p className="scan-error">{cameraError}</p>}
+                  <p className="scan-hint">{locale === 'fr' ? 'Appuyez pour ouvrir la caméra' : 'Tap to open camera'}</p>
+                </>
+              )}
+              {!scanning && !scannedResult && (
+                <div className="scan-actions">
+                  <button className="btn-pill btn-primary" style={{ width: 'auto', padding: '12px 24px' }} onClick={() => startScanner('qr')}>
+                    {Icons.scan} {t('scanQR', locale)}
+                  </button>
+                  <button className="btn-pill btn-secondary" style={{ width: 'auto', padding: '12px 24px' }} onClick={() => setShowMyQR(true)}>
+                    {t('myQRCode', locale)}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
       ) : (
-        /* ─── Barcode Tab ─── */
         <div className="scan-content">
-          <div className="barcode-section">
-            <div className="barcode-display">
-              <div className="barcode-bars">
-                {barcodeBars.map((bar, i) => (
-                  <div key={i} className="barcode-bar" style={{ width: `${bar.width}px`, background: bar.filled ? 'var(--white)' : 'transparent' }} />
-                ))}
-              </div>
-              <div className="barcode-number">{barcodeNum}</div>
+          {scanning ? (
+            <div className="camera-active-container">
+              <div id="scanner-container" className="scanner-container barcode-scanner" />
+              <button className="btn-pill btn-secondary stop-scan-btn" onClick={stopScanner}>
+                {Icons.close} {locale === 'fr' ? 'Arrêter' : 'Stop'}
+              </button>
             </div>
-            <p className="scan-hint">{locale === 'fr' ? 'Scannez le code-barres sur votre facture' : 'Scan the barcode on your utility bill'}</p>
-
-            <div className="manual-entry">
-              <label className="form-label">{t('enterManually', locale)}</label>
-              <div className="manual-entry-row">
-                <input
-                  className="form-input"
-                  placeholder={t('barcodePlaceholder', locale)}
-                  value={manualCode}
-                  onChange={e => setManualCode(e.target.value)}
-                  style={{ flex: 1 }}
-                />
-                <button className="btn-pill btn-primary" disabled={!manualCode} style={{ opacity: manualCode ? 1 : 0.5, padding: '12px 20px' }}>
-                  {t('lookupBill', locale)}
+          ) : scannedResult ? (
+            <div className="scan-result-card">
+              <div className="scan-result-icon">📊</div>
+              <div className="scan-result-label">{t('barcodeNumber', locale)}</div>
+              <div className="scan-result-value">{scannedResult}</div>
+              <div className="scan-actions">
+                <button className="btn-pill btn-primary" style={{ width: 'auto', padding: '12px 24px' }} onClick={() => startScanner('barcode')}>
+                  {Icons.barcodeScan} {locale === 'fr' ? 'Scanner à nouveau' : 'Scan again'}
                 </button>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="barcode-section">
+              <div className="barcode-display">
+                <div className="barcode-bars">
+                  {barcodeBars.map((bar, i) => (
+                    <div key={i} className="barcode-bar" style={{ width: `${bar.width}px`, background: bar.filled ? 'var(--white)' : 'transparent' }} />
+                  ))}
+                </div>
+                <div className="barcode-number">{barcodeNum}</div>
+              </div>
 
-          <div className="scan-actions" style={{ marginTop: '16px' }}>
-            <button className="btn-pill btn-primary" style={{ width: 'auto', padding: '12px 24px' }}>
-              {Icons.barcodeScan} {t('scanBarcode', locale)}
-            </button>
-          </div>
+              {cameraError && <p className="scan-error">{cameraError}</p>}
+              <p className="scan-hint">{locale === 'fr' ? 'Scannez le code-barres sur votre facture' : 'Scan the barcode on your utility bill'}</p>
+
+              <div className="scan-actions" style={{ marginBottom: '20px' }}>
+                <button className="btn-pill btn-primary" style={{ width: 'auto', padding: '12px 24px' }} onClick={() => startScanner('barcode')}>
+                  {Icons.barcodeScan} {t('scanBarcode', locale)}
+                </button>
+              </div>
+
+              <div className="manual-entry">
+                <label className="form-label">{t('enterManually', locale)}</label>
+                <div className="manual-entry-row">
+                  <input
+                    className="form-input"
+                    placeholder={t('barcodePlaceholder', locale)}
+                    value={manualCode}
+                    onChange={e => setManualCode(e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <button className="btn-pill btn-primary" disabled={!manualCode} style={{ opacity: manualCode ? 1 : 0.5, padding: '12px 20px' }}>
+                    {t('lookupBill', locale)}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
+
+
+
 
 function CardsPage({ locale, user }) {
   return (
