@@ -816,9 +816,6 @@ function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick,
 
       <QuickActions locale={locale} onSendClick={onSendClick} onPayBillsClick={onPayBillsClick} onRequestClick={onRequestClick} onSavingsClick={onSavingsClick} />
 
-      {/* Mini Statement */}
-      <MiniStatement transactions={transactions} locale={locale} />
-
       {/* Agent Locator Banner */}
       <div className="agent-banner" onClick={onFindAgent}>
         <div className="agent-banner-icon">{Icons.mapPin}</div>
@@ -828,6 +825,9 @@ function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick,
         </div>
         <div className="agent-banner-arrow">{Icons.chevronRight}</div>
       </div>
+
+      {/* Mini Statement */}
+      <MiniStatement transactions={transactions} locale={locale} />
 
       {/* Recent Transactions */}
       <div className="section-header">
@@ -1343,7 +1343,7 @@ function CardsPage({ locale, user }) {
   );
 }
 
-function ProfilePage({ locale, user, onLocaleChange, theme, onThemeChange, onFindAgent }) {
+function ProfilePage({ locale, user, onLocaleChange, theme, onThemeChange }) {
   const menuItems = [
     { icon: Icons.profile, label: t('personalInfo', locale) },
     { icon: Icons.shield, label: t('security', locale) },
@@ -1370,7 +1370,6 @@ function ProfilePage({ locale, user, onLocaleChange, theme, onThemeChange, onFin
       )
     },
     { icon: Icons.bell, label: t('notifications', locale) },
-    { icon: Icons.mapPin, label: locale === 'fr' ? 'Trouver un Agent' : 'Find Agent', onClick: onFindAgent },
     { icon: Icons.link, label: t('linkedAccounts', locale) },
     { icon: Icons.headphones, label: t('helpSupport', locale) },
   ];
@@ -2040,7 +2039,7 @@ function App() {
       case 'cards':
         return <CardsPage locale={locale} user={MOCK_USER} />;
       case 'profile':
-        return <ProfilePage locale={locale} user={MOCK_USER} onLocaleChange={setLocale} theme={theme} onThemeChange={setTheme} onFindAgent={() => setShowAgentLocator(true)} />;
+        return <ProfilePage locale={locale} user={MOCK_USER} onLocaleChange={setLocale} theme={theme} onThemeChange={setTheme} />;
       default:
         return null;
     }

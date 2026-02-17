@@ -368,6 +368,7 @@
 
 .quick-actions {
   margin-top: var(--space-xl);
+  margin-bottom: var(--space-lg);
   overflow: hidden;
   position: relative;
 }
