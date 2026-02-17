@@ -105,6 +105,25 @@ const EXCHANGE_RATES = {
   'XOF-USD': 0.00164,
 };
 
+// ─── MOCK NOTIFICATIONS ────────────────────────────────
+
+const MOCK_NOTIFICATIONS = [
+  { id: 'n1', type: 'received', title: 'Payment Received', desc: 'Ama Serwah sent you GH₵ 500.00', time: new Date(Date.now() - 1000 * 60 * 30), read: false },
+  { id: 'n2', type: 'bill', title: 'Bill Payment Successful', desc: 'ECG electricity bill paid — GH₵ 85.00', time: new Date(Date.now() - 1000 * 60 * 60 * 3), read: false },
+  { id: 'n3', type: 'promo', title: 'Referral Bonus!', desc: 'You earned GH₵ 5.00 from a referral', time: new Date(Date.now() - 1000 * 60 * 60 * 8), read: false },
+  { id: 'n4', type: 'security', title: 'New Login Detected', desc: 'Login from Chrome on Windows', time: new Date(Date.now() - 1000 * 60 * 60 * 24), read: true },
+  { id: 'n5', type: 'sent', title: 'Money Sent', desc: 'You sent GH₵ 150.00 to Kofi Mensah', time: new Date(Date.now() - 1000 * 60 * 60 * 26), read: true },
+  { id: 'n6', type: 'request', title: 'Payment Request', desc: 'Akua Ampofo requested GH₵ 200.00', time: new Date(Date.now() - 1000 * 60 * 60 * 48), read: true },
+];
+
+// ─── MOCK SAVINGS GOALS ────────────────────────────────
+
+const MOCK_SAVINGS_GOALS = [
+  { id: 'sg1', name: 'School Fees', emoji: '🎓', target: 5000, saved: 3200, currency: 'GHS', color: '#8B5CF6' },
+  { id: 'sg2', name: 'Emergency Fund', emoji: '🛡️', target: 2000, saved: 850, currency: 'GHS', color: '#00C853' },
+  { id: 'sg3', name: 'Travel to Lomé', emoji: '✈️', target: 1500, saved: 1500, currency: 'GHS', color: '#FF9800' },
+];
+
 // ─── BILL PROVIDERS ────────────────────────────────────
 
 const BILL_CATEGORIES = [
@@ -397,6 +416,27 @@ const Icons = {
       <polygon points="3 11 22 2 13 21 11 13 3 11" />
     </svg>
   ),
+  target: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
+    </svg>
+  ),
+  download: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  ),
+  piggyBank: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2" />
+      <path d="M2 9.5a2.5 2.5 0 0 1 0 5" /><circle cx="15" cy="9" r="1" />
+    </svg>
+  ),
+  plus: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  ),
 };
 
 // ─── HELPER FUNCTIONS ──────────────────────────────────
@@ -501,12 +541,13 @@ function BalanceCard({ wallets, selectedCurrency, onCurrencyChange, locale, bala
   );
 }
 
-function QuickActions({ locale, onSendClick, onPayBillsClick }) {
+function QuickActions({ locale, onSendClick, onPayBillsClick, onRequestClick, onSavingsClick }) {
   const actions = [
     { icon: <div className="quick-action-icon send">{Icons.send}</div>, label: t('send', locale), onClick: onSendClick },
-    { icon: <div className="quick-action-icon receive">{Icons.receive}</div>, label: t('receive', locale), onClick: () => { } },
+    { icon: <div className="quick-action-icon receive">{Icons.receive}</div>, label: t('receive', locale), onClick: onRequestClick },
     { icon: <div className="quick-action-icon topup">{Icons.topup}</div>, label: t('topUp', locale), onClick: () => { } },
     { icon: <div className="quick-action-icon bills">{Icons.electricity}</div>, label: t('payBills', locale), onClick: onPayBillsClick },
+    { icon: <div className="quick-action-icon savings">{Icons.piggyBank}</div>, label: locale === 'fr' ? 'Épargne' : 'Savings', onClick: onSavingsClick },
   ];
 
   return (
@@ -734,7 +775,7 @@ function SendMoneyModal({ onClose, locale, wallets }) {
 
 // ─── PAGES ─────────────────────────────────────────────
 
-function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick, selectedCurrency, onCurrencyChange, balanceHidden, onToggleBalance }) {
+function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick, onRequestClick, onSavingsClick, selectedCurrency, onCurrencyChange, balanceHidden, onToggleBalance }) {
   return (
     <>
       <BalanceCard
@@ -745,7 +786,10 @@ function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick,
         balanceHidden={balanceHidden}
       />
 
-      <QuickActions locale={locale} onSendClick={onSendClick} onPayBillsClick={onPayBillsClick} />
+      <QuickActions locale={locale} onSendClick={onSendClick} onPayBillsClick={onPayBillsClick} onRequestClick={onRequestClick} onSavingsClick={onSavingsClick} />
+
+      {/* Mini Statement */}
+      <MiniStatement transactions={transactions} locale={locale} />
 
       {/* Promo Banner */}
       <div className="promo-banner">
@@ -1337,6 +1381,326 @@ function ProfilePage({ locale, user, onLocaleChange, theme, onThemeChange, onFin
   );
 }
 
+
+// ─── NOTIFICATIONS PANEL ───────────────────────────────
+
+function NotificationsPanel({ locale, notifications, onClose }) {
+  const [items, setItems] = useState(notifications);
+
+  const markAllRead = () => {
+    setItems(items.map(n => ({ ...n, read: true })));
+  };
+
+  const getIcon = (type) => {
+    const map = { received: '💰', sent: '📤', bill: '🧾', promo: '🎁', security: '🔒', request: '📩' };
+    return map[type] || '🔔';
+  };
+
+  const unreadCount = items.filter(n => !n.read).length;
+
+  return (
+    <div className="notifications-overlay" onClick={onClose}>
+      <div className="notifications-panel" onClick={e => e.stopPropagation()}>
+        <div className="notifications-header">
+          <h3>{locale === 'fr' ? 'Notifications' : 'Notifications'}</h3>
+          {unreadCount > 0 && (
+            <button className="notif-mark-read" onClick={markAllRead}>
+              {locale === 'fr' ? 'Tout marquer lu' : 'Mark all read'}
+            </button>
+          )}
+          <button className="notif-close" onClick={onClose}>{Icons.close}</button>
+        </div>
+
+        <div className="notifications-list">
+          {items.map(n => (
+            <div key={n.id} className={`notif-item ${n.read ? 'read' : 'unread'}`}>
+              <div className="notif-icon">{getIcon(n.type)}</div>
+              <div className="notif-content">
+                <div className="notif-title">{n.title}</div>
+                <div className="notif-desc">{n.desc}</div>
+                <div className="notif-time">{timeAgo(n.time, locale)}</div>
+              </div>
+              {(n.type === 'received' || n.type === 'sent' || n.type === 'bill') && (
+                <button className="notif-receipt-btn" title={locale === 'fr' ? 'Télécharger reçu' : 'Download Receipt'}>
+                  {Icons.download}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SAVINGS GOALS PAGE ────────────────────────────────
+
+function SavingsGoalsPage({ locale, onClose }) {
+  const [goals, setGoals] = useState(MOCK_SAVINGS_GOALS);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newGoalName, setNewGoalName] = useState('');
+  const [newGoalTarget, setNewGoalTarget] = useState('');
+
+  const handleCreateGoal = () => {
+    if (!newGoalName || !newGoalTarget) return;
+    const emojis = ['🎯', '💎', '🏠', '🚗', '💰', '📱', '🎓'];
+    const colors = ['#8B5CF6', '#00C853', '#FF9800', '#06B6D4', '#E91E63'];
+    setGoals([...goals, {
+      id: `sg_${Date.now()}`,
+      name: newGoalName,
+      emoji: emojis[Math.floor(Math.random() * emojis.length)],
+      target: parseFloat(newGoalTarget),
+      saved: 0,
+      currency: 'GHS',
+      color: colors[Math.floor(Math.random() * colors.length)],
+    }]);
+    setNewGoalName('');
+    setNewGoalTarget('');
+    setShowCreate(false);
+  };
+
+  return (
+    <div className="savings-overlay">
+      <div className="savings-modal">
+        <div className="agent-header">
+          <button className="bills-back-btn" onClick={onClose}>{Icons.chevronRight}</button>
+          <h2 className="bills-title">{locale === 'fr' ? 'Objectifs d\'Épargne' : 'Savings Goals'}</h2>
+        </div>
+
+        {/* Total Saved */}
+        <div className="savings-summary-card">
+          <div className="savings-summary-icon">{Icons.piggyBank}</div>
+          <div>
+            <div className="savings-summary-label">{locale === 'fr' ? 'Total Épargné' : 'Total Saved'}</div>
+            <div className="savings-summary-amount">{formatCurrency(goals.reduce((sum, g) => sum + g.saved, 0), 'GHS')}</div>
+          </div>
+        </div>
+
+        {/* Goals List */}
+        <div className="savings-goals-list">
+          {goals.map(goal => {
+            const pct = Math.min((goal.saved / goal.target) * 100, 100);
+            const isComplete = pct >= 100;
+            return (
+              <div key={goal.id} className={`savings-goal-card ${isComplete ? 'complete' : ''}`}>
+                <div className="savings-goal-header">
+                  <span className="savings-goal-emoji">{goal.emoji}</span>
+                  <div className="savings-goal-info">
+                    <div className="savings-goal-name">{goal.name}</div>
+                    <div className="savings-goal-amounts">
+                      {formatCurrency(goal.saved, goal.currency)} / {formatCurrency(goal.target, goal.currency)}
+                    </div>
+                  </div>
+                  {isComplete && <span className="savings-goal-badge">✅</span>}
+                </div>
+                <div className="savings-goal-bar-bg">
+                  <div
+                    className="savings-goal-bar-fill"
+                    style={{ width: `${pct}%`, background: goal.color }}
+                  />
+                </div>
+                <div className="savings-goal-pct">{Math.round(pct)}%</div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Create New */}
+        {showCreate ? (
+          <div className="savings-create-form">
+            <input
+              className="form-input"
+              placeholder={locale === 'fr' ? 'Nom de l\'objectif' : 'Goal name'}
+              value={newGoalName}
+              onChange={e => setNewGoalName(e.target.value)}
+            />
+            <input
+              className="form-input"
+              type="number"
+              placeholder={locale === 'fr' ? 'Montant cible (GH₵)' : 'Target amount (GH₵)'}
+              value={newGoalTarget}
+              onChange={e => setNewGoalTarget(e.target.value)}
+            />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button className="btn-pill btn-primary" onClick={handleCreateGoal} style={{ flex: 1 }}>
+                {locale === 'fr' ? 'Créer' : 'Create'}
+              </button>
+              <button className="btn-pill btn-secondary" onClick={() => setShowCreate(false)} style={{ flex: 1 }}>
+                {locale === 'fr' ? 'Annuler' : 'Cancel'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button className="btn-pill btn-primary savings-add-btn" onClick={() => setShowCreate(true)}>
+            {Icons.plus} {locale === 'fr' ? 'Nouvel Objectif' : 'New Goal'}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── REQUEST MONEY MODAL ───────────────────────────────
+
+function RequestMoneyModal({ locale, user, onClose }) {
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
+  const [step, setStep] = useState('form'); // form | share
+
+  const handleGenerate = () => {
+    if (!amount) return;
+    setStep('share');
+  };
+
+  const requestLink = `https://clinocash.app/pay/${user.username}?amount=${amount}`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(requestLink).catch(() => { });
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-container" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>{locale === 'fr' ? 'Demander de l\'Argent' : 'Request Money'}</h2>
+          <button className="modal-close" onClick={onClose}>{Icons.close}</button>
+        </div>
+
+        {step === 'form' ? (
+          <div className="modal-body">
+            <div className="form-group">
+              <label className="form-label">{t('amount', locale)}</label>
+              <input
+                className="form-input amount-input"
+                type="number"
+                placeholder="0.00"
+                value={amount}
+                onChange={e => setAmount(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">{t('description', locale)}</label>
+              <input
+                className="form-input"
+                placeholder={t('descriptionPlaceholder', locale)}
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+              />
+            </div>
+            <button
+              className="btn-pill btn-primary"
+              disabled={!amount || parseFloat(amount) <= 0}
+              style={{ opacity: amount && parseFloat(amount) > 0 ? 1 : 0.5 }}
+              onClick={handleGenerate}
+            >
+              {locale === 'fr' ? 'Générer le Lien' : 'Generate Link'}
+            </button>
+          </div>
+        ) : (
+          <div className="modal-body request-share">
+            <div className="request-share-card">
+              <div className="request-share-emoji">📩</div>
+              <div className="request-share-amount">
+                {formatCurrency(parseFloat(amount), 'GHS')}
+              </div>
+              {description && <div className="request-share-desc">{description}</div>}
+              <div className="request-share-from">
+                {locale === 'fr' ? 'Demandé par' : 'Requested by'} @{user.username}
+              </div>
+            </div>
+
+            <div className="request-link-box">
+              <div className="request-link-url">{requestLink}</div>
+              <button className="request-copy-btn" onClick={handleCopy}>
+                {locale === 'fr' ? 'Copier' : 'Copy'}
+              </button>
+            </div>
+
+            <div className="scan-actions" style={{ marginTop: '16px' }}>
+              <button className="btn-pill btn-primary" style={{ width: 'auto', padding: '12px 24px' }} onClick={handleCopy}>
+                {Icons.send} {locale === 'fr' ? 'Partager' : 'Share'}
+              </button>
+              <button className="btn-pill btn-secondary" style={{ width: 'auto', padding: '12px 24px' }} onClick={onClose}>
+                {locale === 'fr' ? 'Terminé' : 'Done'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── MINI STATEMENT ────────────────────────────────────
+
+function MiniStatement({ transactions, locale }) {
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const monthlyTxns = transactions.filter(t => t.date >= monthStart);
+  const totalReceived = monthlyTxns.filter(t => t.direction === 'received').reduce((s, t) => s + t.amount, 0);
+  const totalSent = monthlyTxns.filter(t => t.direction === 'sent').reduce((s, t) => s + t.amount, 0);
+  const txnCount = monthlyTxns.length;
+
+  const total = totalReceived + totalSent || 1;
+  const receivedPct = (totalReceived / total) * 100;
+
+  return (
+    <div className="mini-statement">
+      <div className="mini-statement-header">
+        <h3 className="mini-statement-title">
+          {locale === 'fr' ? 'Résumé du Mois' : 'Monthly Summary'}
+        </h3>
+        <span className="mini-statement-badge">{t('thisMonth', locale)}</span>
+      </div>
+
+      <div className="mini-statement-body">
+        <div className="mini-statement-chart">
+          <svg viewBox="0 0 100 100" className="mini-donut">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="var(--surface-card)" strokeWidth="12" />
+            <circle
+              cx="50" cy="50" r="40" fill="none"
+              stroke="var(--cyan)"
+              strokeWidth="12"
+              strokeDasharray={`${receivedPct * 2.51} ${251 - receivedPct * 2.51}`}
+              strokeDashoffset="63"
+              strokeLinecap="round"
+            />
+            <circle
+              cx="50" cy="50" r="40" fill="none"
+              stroke="var(--red)"
+              strokeWidth="12"
+              strokeDasharray={`${(100 - receivedPct) * 2.51} ${251 - (100 - receivedPct) * 2.51}`}
+              strokeDashoffset={`${63 - receivedPct * 2.51}`}
+              strokeLinecap="round"
+            />
+            <text x="50" y="48" textAnchor="middle" fill="var(--white)" fontSize="14" fontWeight="700">{txnCount}</text>
+            <text x="50" y="62" textAnchor="middle" fill="var(--gray-400)" fontSize="8">txns</text>
+          </svg>
+        </div>
+
+        <div className="mini-statement-stats">
+          <div className="mini-stat">
+            <div className="mini-stat-dot received" />
+            <div className="mini-stat-info">
+              <div className="mini-stat-label">{locale === 'fr' ? 'Reçu' : 'Received'}</div>
+              <div className="mini-stat-value">{formatCurrency(totalReceived, 'GHS')}</div>
+            </div>
+          </div>
+          <div className="mini-stat">
+            <div className="mini-stat-dot sent" />
+            <div className="mini-stat-info">
+              <div className="mini-stat-label">{locale === 'fr' ? 'Envoyé' : 'Sent'}</div>
+              <div className="mini-stat-value">{formatCurrency(totalSent, 'GHS')}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── ONBOARDING WALKTHROUGH ────────────────────────────
 
 function OnboardingWalkthrough({ locale, onComplete }) {
@@ -1577,6 +1941,9 @@ function App() {
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('clinocash_onboarded'));
   const [showAgentLocator, setShowAgentLocator] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('clinocash_theme') || 'dark');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [showSavingsPage, setShowSavingsPage] = useState(false);
 
   // Apply theme to document
   useEffect(() => {
@@ -1628,6 +1995,8 @@ function App() {
             transactions={MOCK_TRANSACTIONS}
             onSendClick={() => setShowSendModal(true)}
             onPayBillsClick={() => setShowBillsPage(true)}
+            onRequestClick={() => setShowRequestModal(true)}
+            onSavingsClick={() => setShowSavingsPage(true)}
             selectedCurrency={selectedCurrency}
             onCurrencyChange={setSelectedCurrency}
             balanceHidden={balanceHidden}
@@ -1662,7 +2031,7 @@ function App() {
           <button className="header-icon-btn" onClick={() => setBalanceHidden(!balanceHidden)} id="toggle-balance-btn">
             {balanceHidden ? Icons.eyeOff : Icons.eye}
           </button>
-          <button className="header-icon-btn" id="notifications-btn">
+          <button className="header-icon-btn" id="notifications-btn" onClick={() => setShowNotifications(true)}>
             {Icons.bell}
             <span className="badge">3</span>
           </button>
@@ -1725,6 +2094,21 @@ function App() {
       {/* Agent Locator */}
       {showAgentLocator && (
         <AgentLocator locale={locale} onClose={() => setShowAgentLocator(false)} />
+      )}
+
+      {/* Notifications */}
+      {showNotifications && (
+        <NotificationsPanel locale={locale} notifications={MOCK_NOTIFICATIONS} onClose={() => setShowNotifications(false)} />
+      )}
+
+      {/* Request Money */}
+      {showRequestModal && (
+        <RequestMoneyModal locale={locale} user={MOCK_USER} onClose={() => setShowRequestModal(false)} />
+      )}
+
+      {/* Savings Goals */}
+      {showSavingsPage && (
+        <SavingsGoalsPage locale={locale} onClose={() => setShowSavingsPage(false)} />
       )}
     </div>
   );
