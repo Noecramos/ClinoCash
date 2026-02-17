@@ -104,6 +104,67 @@ const EXCHANGE_RATES = {
   'XOF-USD': 0.00164,
 };
 
+// ─── BILL PROVIDERS ────────────────────────────────────
+
+const BILL_CATEGORIES = [
+  {
+    id: 'electricity', icon: 'electricity', color: '#FFD700', providers: [
+      { id: 'ecg', name: 'ECG (Electricity Company of Ghana)', logo: '⚡' },
+      { id: 'gridco', name: 'GRIDCo', logo: '🔌' },
+      { id: 'ceet', name: 'CEET (Togo)', logo: '💡' },
+    ]
+  },
+  {
+    id: 'water', icon: 'water', color: '#00B4D8', providers: [
+      { id: 'gwcl', name: 'Ghana Water Company', logo: '💧' },
+      { id: 'tde', name: 'TdE (Togo)', logo: '🚿' },
+    ]
+  },
+  {
+    id: 'internet', icon: 'wifi', color: '#8B5CF6', providers: [
+      { id: 'vodafone_fiber', name: 'Vodafone Fiber', logo: '🌐' },
+      { id: 'mtn_fiber', name: 'MTN Fiber', logo: '📡' },
+      { id: 'togocom', name: 'Togocom Internet', logo: '📶' },
+      { id: 'busy', name: 'Busy Internet', logo: '💻' },
+    ]
+  },
+  {
+    id: 'tvCable', icon: 'tv', color: '#F43F5E', providers: [
+      { id: 'dstv', name: 'DSTV / MultiChoice', logo: '📺' },
+      { id: 'gotv', name: 'GOtv', logo: '📡' },
+      { id: 'startimes', name: 'StarTimes', logo: '⭐' },
+    ]
+  },
+  {
+    id: 'airtime', icon: 'phone', color: '#00C853', providers: [
+      { id: 'mtn', name: 'MTN Ghana', logo: '📱' },
+      { id: 'vodafone', name: 'Vodafone Ghana', logo: '📞' },
+      { id: 'airteltigo', name: 'AirtelTigo', logo: '📲' },
+      { id: 'moov', name: 'Moov Africa (Togo)', logo: '🔗' },
+    ]
+  },
+  {
+    id: 'education', icon: 'graduationCap', color: '#06B6D4', providers: [
+      { id: 'uog', name: 'University of Ghana', logo: '🎓' },
+      { id: 'knust', name: 'KNUST', logo: '🏫' },
+      { id: 'ul', name: 'Université de Lomé', logo: '📚' },
+    ]
+  },
+  {
+    id: 'health', icon: 'medical', color: '#EF4444', providers: [
+      { id: 'nhis', name: 'NHIS (National Health Insurance)', logo: '🏥' },
+      { id: 'korle_bu', name: 'Korle-Bu Teaching Hospital', logo: '🩺' },
+    ]
+  },
+  {
+    id: 'government', icon: 'building', color: '#F59E0B', providers: [
+      { id: 'gra', name: 'GRA (Ghana Revenue Authority)', logo: '🏛️' },
+      { id: 'dvla', name: 'DVLA Ghana', logo: '🚗' },
+      { id: 'otr', name: 'OTR (Office Togolais des Recettes)', logo: '🏦' },
+    ]
+  },
+];
+
 // ─── ICONS (SVG inline for zero dependencies) ──────────
 
 const Icons = {
@@ -237,6 +298,66 @@ const Icons = {
       <polyline points="20 6 9 17 4 12" />
     </svg>
   ),
+  // Bill category icons
+  electricity: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
+  ),
+  water: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+    </svg>
+  ),
+  wifi: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12.55a11 11 0 0 1 14.08 0" /><path d="M1.42 9a16 16 0 0 1 21.16 0" />
+      <path d="M8.53 16.11a6 6 0 0 1 6.95 0" /><line x1="12" y1="20" x2="12.01" y2="20" />
+    </svg>
+  ),
+  tv: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="15" rx="2" ry="2" /><polyline points="17 2 12 7 7 2" />
+    </svg>
+  ),
+  phone: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" /><line x1="12" y1="18" x2="12.01" y2="18" />
+    </svg>
+  ),
+  graduationCap: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5" />
+    </svg>
+  ),
+  medical: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 12h-6l-2 3h-4l-2-3H2" /><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+    </svg>
+  ),
+  building: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="2" width="16" height="20" rx="1" /><line x1="9" y1="6" x2="9.01" y2="6" />
+      <line x1="15" y1="6" x2="15.01" y2="6" /><line x1="9" y1="10" x2="9.01" y2="10" />
+      <line x1="15" y1="10" x2="15.01" y2="10" /><line x1="9" y1="14" x2="9.01" y2="14" />
+      <line x1="15" y1="14" x2="15.01" y2="14" /><path d="M9 22v-4h6v4" />
+    </svg>
+  ),
+  barcodeScan: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="2" height="16" /><rect x="6" y="4" width="1" height="16" />
+      <rect x="9" y="4" width="2" height="16" /><rect x="13" y="4" width="1" height="16" />
+      <rect x="16" y="4" width="3" height="16" /><rect x="21" y="4" width="1" height="16" />
+    </svg>
+  ),
+  qrcode: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="8" height="8" rx="1" /><rect x="14" y="2" width="8" height="8" rx="1" />
+      <rect x="2" y="14" width="8" height="8" rx="1" /><rect x="14" y="14" width="4" height="4" rx="1" />
+      <line x1="22" y1="14" x2="22" y2="14.01" /><line x1="22" y1="18" x2="22" y2="22" />
+      <line x1="18" y1="22" x2="18" y2="22.01" />
+    </svg>
+  ),
 };
 
 // ─── HELPER FUNCTIONS ──────────────────────────────────
@@ -341,12 +462,12 @@ function BalanceCard({ wallets, selectedCurrency, onCurrencyChange, locale, bala
   );
 }
 
-function QuickActions({ locale, onSendClick }) {
+function QuickActions({ locale, onSendClick, onPayBillsClick }) {
   const actions = [
     { icon: <div className="quick-action-icon send">{Icons.send}</div>, label: t('send', locale), onClick: onSendClick },
     { icon: <div className="quick-action-icon receive">{Icons.receive}</div>, label: t('receive', locale), onClick: () => { } },
     { icon: <div className="quick-action-icon topup">{Icons.topup}</div>, label: t('topUp', locale), onClick: () => { } },
-    { icon: <div className="quick-action-icon more">{Icons.more}</div>, label: t('more', locale), onClick: () => { } },
+    { icon: <div className="quick-action-icon bills">{Icons.electricity}</div>, label: t('payBills', locale), onClick: onPayBillsClick },
   ];
 
   return (
@@ -574,7 +695,7 @@ function SendMoneyModal({ onClose, locale, wallets }) {
 
 // ─── PAGES ─────────────────────────────────────────────
 
-function HomePage({ locale, wallets, transactions, onSendClick, selectedCurrency, onCurrencyChange, balanceHidden, onToggleBalance }) {
+function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick, selectedCurrency, onCurrencyChange, balanceHidden, onToggleBalance }) {
   return (
     <>
       <BalanceCard
@@ -585,7 +706,7 @@ function HomePage({ locale, wallets, transactions, onSendClick, selectedCurrency
         balanceHidden={balanceHidden}
       />
 
-      <QuickActions locale={locale} onSendClick={onSendClick} />
+      <QuickActions locale={locale} onSendClick={onSendClick} onPayBillsClick={onPayBillsClick} />
 
       {/* Promo Banner */}
       <div className="promo-banner">
@@ -660,56 +781,297 @@ function ActivityPage({ locale, transactions }) {
   );
 }
 
-function ScanPage({ locale }) {
-  return (
-    <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-      <div style={{
-        width: '200px',
-        height: '200px',
-        margin: '0 auto 24px',
-        border: '3px solid var(--cyan)',
-        borderRadius: 'var(--radius-xl)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        background: 'var(--surface-card)',
-        animation: 'glow 3s ease-in-out infinite',
-      }}>
-        {/* QR Code placeholder */}
-        <div style={{
-          width: '150px',
-          height: '150px',
-          background: 'var(--white)',
-          borderRadius: 'var(--radius-md)',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          gridTemplateRows: 'repeat(7, 1fr)',
-          gap: '2px',
-          padding: '8px',
-        }}>
-          {Array.from({ length: 49 }, (_, i) => (
-            <div key={i} style={{
-              background: Math.random() > 0.5 ? 'var(--navy-dark)' : 'var(--white)',
-              borderRadius: '2px',
-            }} />
+function PayBillsPage({ locale, onBack }) {
+  const [step, setStep] = useState('categories'); // categories, providers, form, confirm, success
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedProvider, setSelectedProvider] = useState(null);
+  const [accountNumber, setAccountNumber] = useState('');
+  const [amount, setAmount] = useState('');
+  const [paying, setPaying] = useState(false);
+
+  const handleCategoryClick = (cat) => {
+    setSelectedCategory(cat);
+    setStep('providers');
+  };
+
+  const handleProviderClick = (provider) => {
+    setSelectedProvider(provider);
+    setStep('form');
+  };
+
+  const handleContinue = () => {
+    if (accountNumber && amount && parseFloat(amount) > 0) setStep('confirm');
+  };
+
+  const handlePay = async () => {
+    setPaying(true);
+    await new Promise(r => setTimeout(r, 2000));
+    setPaying(false);
+    setStep('success');
+  };
+
+  const reset = () => {
+    setStep('categories');
+    setSelectedCategory(null);
+    setSelectedProvider(null);
+    setAccountNumber('');
+    setAmount('');
+  };
+
+  // Success screen
+  if (step === 'success') {
+    return (
+      <div className="bills-page">
+        <div className="empty-state" style={{ padding: '60px 0' }}>
+          <div className="empty-state-icon" style={{ fontSize: '4rem' }}>✅</div>
+          <div className="empty-state-title" style={{ color: 'var(--green)' }}>
+            {t('paymentSuccess', locale)}
+          </div>
+          <div className="empty-state-desc" style={{ marginTop: '8px' }}>
+            {formatCurrency(parseFloat(amount), 'GHS', locale)} → {selectedProvider?.name}
+          </div>
+          <button className="btn-pill btn-primary" style={{ marginTop: '24px' }} onClick={reset}>
+            {Icons.check} Done
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Confirm screen
+  if (step === 'confirm') {
+    const fee = parseFloat(amount) * 0.01;
+    const total = parseFloat(amount) + fee;
+    return (
+      <div className="bills-page">
+        <div className="bills-header">
+          <button className="bills-back-btn" onClick={() => setStep('form')}>{Icons.chevronRight}</button>
+          <h2 className="bills-title">{t('confirmPay', locale)}</h2>
+        </div>
+        <div style={{ textAlign: 'center', padding: '16px 0 24px' }}>
+          <div className="bill-provider-selected">{selectedProvider?.logo}</div>
+          <div style={{ fontWeight: 600, marginTop: '8px' }}>{selectedProvider?.name}</div>
+          <div style={{ color: 'var(--gray-400)', fontSize: 'var(--text-sm)', marginTop: '4px' }}>
+            {t('accountNumber', locale)}: {accountNumber}
+          </div>
+        </div>
+        <div className="confirm-details-card">
+          <div className="confirm-row">
+            <span>{t('billAmount', locale)}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{formatCurrency(parseFloat(amount), 'GHS', locale)}</span>
+          </div>
+          <div className="confirm-row">
+            <span>{t('fee', locale)} (1%)</span>
+            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--gray-300)' }}>{formatCurrency(fee, 'GHS', locale)}</span>
+          </div>
+          <div className="confirm-divider" />
+          <div className="confirm-row">
+            <span style={{ fontWeight: 700 }}>{t('total', locale)}</span>
+            <span style={{ fontWeight: 700, color: 'var(--cyan)', fontFamily: 'var(--font-mono)' }}>{formatCurrency(total, 'GHS', locale)}</span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+          <button className="btn-pill btn-secondary" onClick={() => setStep('form')} style={{ flex: 1 }}>← {t('back', locale)}</button>
+          <button className="btn-pill btn-primary" onClick={handlePay} disabled={paying} style={{ flex: 2, opacity: paying ? 0.7 : 1 }}>
+            {paying ? t('processing', locale) : t('confirmPay', locale)}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Form screen (enter account + amount)
+  if (step === 'form') {
+    return (
+      <div className="bills-page">
+        <div className="bills-header">
+          <button className="bills-back-btn" onClick={() => setStep('providers')}>{Icons.chevronRight}</button>
+          <h2 className="bills-title">{selectedProvider?.name}</h2>
+        </div>
+        <div style={{ textAlign: 'center', padding: '16px 0', fontSize: '2.5rem' }}>{selectedProvider?.logo}</div>
+        <div className="form-group">
+          <label className="form-label">{t('accountNumber', locale)}</label>
+          <input className="form-input" placeholder={t('accountPlaceholder', locale)} value={accountNumber} onChange={e => setAccountNumber(e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label className="form-label">{t('amount', locale)} (GHS)</label>
+          <div className="amount-display">
+            <div className="amount-currency">GHS</div>
+            <input className="form-input-amount" type="number" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} />
+          </div>
+        </div>
+        <button className="btn-pill btn-primary" onClick={handleContinue} disabled={!accountNumber || !amount} style={{ opacity: (!accountNumber || !amount) ? 0.5 : 1 }}>
+          {t('continue', locale)}
+        </button>
+      </div>
+    );
+  }
+
+  // Provider selection
+  if (step === 'providers') {
+    return (
+      <div className="bills-page">
+        <div className="bills-header">
+          <button className="bills-back-btn" onClick={() => setStep('categories')}>{Icons.chevronRight}</button>
+          <h2 className="bills-title">{t(selectedCategory?.id, locale)} — {t('selectProvider', locale)}</h2>
+        </div>
+        <div className="provider-list">
+          {selectedCategory?.providers.map(p => (
+            <button key={p.id} className="provider-item" onClick={() => handleProviderClick(p)}>
+              <span className="provider-logo">{p.logo}</span>
+              <span className="provider-name">{p.name}</span>
+              <span className="provider-arrow">{Icons.chevronRight}</span>
+            </button>
           ))}
         </div>
       </div>
-      <h3 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: '8px' }}>
-        {t('scan', locale)} QR Code
-      </h3>
-      <p style={{ color: 'var(--gray-400)', fontSize: 'var(--text-sm)' }}>
-        {locale === 'fr' ? 'Scannez pour envoyer ou recevoir de l\'argent' : 'Scan to send or receive money instantly'}
-      </p>
-      <div style={{ display: 'flex', gap: '12px', marginTop: '24px', justifyContent: 'center' }}>
-        <button className="btn-pill btn-primary" style={{ width: 'auto', padding: '12px 24px' }}>
-          {Icons.scan} {locale === 'fr' ? 'Scanner' : 'Scan QR'}
+    );
+  }
+
+  // Category grid
+  return (
+    <div className="bills-page">
+      {onBack && (
+        <div className="bills-header">
+          <button className="bills-back-btn" onClick={onBack}>{Icons.chevronRight}</button>
+          <h2 className="bills-title">{t('payBills', locale)}</h2>
+        </div>
+      )}
+      {!onBack && <h2 className="bills-title" style={{ marginBottom: '20px' }}>{t('payBills', locale)}</h2>}
+      <div className="bills-grid">
+        {BILL_CATEGORIES.map(cat => (
+          <button key={cat.id} className="bill-category-card" onClick={() => handleCategoryClick(cat)}>
+            <div className="bill-category-icon" style={{ background: `${cat.color}18`, color: cat.color }}>
+              {Icons[cat.icon]}
+            </div>
+            <span className="bill-category-label">{t(cat.id, locale)}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ScanPage({ locale, user }) {
+  const [tab, setTab] = useState('qr'); // qr, barcode
+  const [showMyQR, setShowMyQR] = useState(false);
+  const [manualCode, setManualCode] = useState('');
+
+  // Generate a deterministic QR-like matrix from user ID
+  const qrMatrix = [];
+  const seed = user.id;
+  for (let i = 0; i < 81; i++) {
+    const charCode = seed.charCodeAt(i % seed.length);
+    qrMatrix.push((charCode * (i + 1) * 7) % 3 !== 0);
+  }
+
+  // Demo barcode number
+  const barcodeNum = '2847 6391 0054 8820 3';
+  const barcodeBars = [];
+  for (let i = 0; i < 50; i++) {
+    const w = (i * 7 + 3) % 4 === 0 ? 3 : (i * 11 + 5) % 3 === 0 ? 2 : 1;
+    barcodeBars.push({ width: w, filled: i % 2 === 0 });
+  }
+
+  return (
+    <div className="scan-page">
+      {/* Tab switcher */}
+      <div className="scan-tabs">
+        <button className={`scan-tab ${tab === 'qr' ? 'active' : ''}`} onClick={() => setTab('qr')}>
+          {Icons.qrcode} <span>{t('qrCode', locale)}</span>
         </button>
-        <button className="btn-pill btn-secondary" style={{ width: 'auto', padding: '12px 24px' }}>
-          {locale === 'fr' ? 'Mon Code' : 'My Code'}
+        <button className={`scan-tab ${tab === 'barcode' ? 'active' : ''}`} onClick={() => setTab('barcode')}>
+          {Icons.barcodeScan} <span>{t('barcode', locale)}</span>
         </button>
       </div>
+
+      {tab === 'qr' ? (
+        <div className="scan-content">
+          {showMyQR ? (
+            /* ─── My QR Code ─── */
+            <div className="my-qr-section">
+              <div className="qr-display-card">
+                <img src="/logo.png" alt="ClinoCash" style={{ width: '36px', height: '36px', marginBottom: '8px' }} />
+                <div className="qr-matrix-large">
+                  {qrMatrix.map((filled, i) => (
+                    <div key={i} className={`qr-cell ${filled ? 'filled' : ''}`} />
+                  ))}
+                </div>
+                <div className="qr-user-info">
+                  <strong>{user.displayName}</strong>
+                  <span>@{user.username}</span>
+                  <span className="qr-clinocash-id">{t('clinocashId', locale)}: {user.id}</span>
+                </div>
+              </div>
+              <p className="scan-hint">{t('scanToPayMe', locale)}</p>
+              <div className="scan-actions">
+                <button className="btn-pill btn-primary" style={{ width: 'auto', padding: '12px 24px' }}>
+                  {Icons.send} {t('shareQR', locale)}
+                </button>
+                <button className="btn-pill btn-secondary" style={{ width: 'auto', padding: '12px 24px' }} onClick={() => setShowMyQR(false)}>
+                  {Icons.scan} {t('scanQR', locale)}
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* ─── Scan QR ─── */
+            <div className="scan-viewfinder-section">
+              <div className="scan-viewfinder">
+                <div className="viewfinder-corner tl" /><div className="viewfinder-corner tr" />
+                <div className="viewfinder-corner bl" /><div className="viewfinder-corner br" />
+                <div className="viewfinder-line" />
+                <div className="viewfinder-icon">{Icons.scan}</div>
+              </div>
+              <p className="scan-hint">{locale === 'fr' ? 'Alignez le code QR dans le cadre' : 'Point camera at a QR code'}</p>
+              <div className="scan-actions">
+                <button className="btn-pill btn-primary" style={{ width: 'auto', padding: '12px 24px' }}>
+                  {Icons.scan} {t('scanQR', locale)}
+                </button>
+                <button className="btn-pill btn-secondary" style={{ width: 'auto', padding: '12px 24px' }} onClick={() => setShowMyQR(true)}>
+                  {t('myQRCode', locale)}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* ─── Barcode Tab ─── */
+        <div className="scan-content">
+          <div className="barcode-section">
+            <div className="barcode-display">
+              <div className="barcode-bars">
+                {barcodeBars.map((bar, i) => (
+                  <div key={i} className="barcode-bar" style={{ width: `${bar.width}px`, background: bar.filled ? 'var(--white)' : 'transparent' }} />
+                ))}
+              </div>
+              <div className="barcode-number">{barcodeNum}</div>
+            </div>
+            <p className="scan-hint">{locale === 'fr' ? 'Scannez le code-barres sur votre facture' : 'Scan the barcode on your utility bill'}</p>
+
+            <div className="manual-entry">
+              <label className="form-label">{t('enterManually', locale)}</label>
+              <div className="manual-entry-row">
+                <input
+                  className="form-input"
+                  placeholder={t('barcodePlaceholder', locale)}
+                  value={manualCode}
+                  onChange={e => setManualCode(e.target.value)}
+                  style={{ flex: 1 }}
+                />
+                <button className="btn-pill btn-primary" disabled={!manualCode} style={{ opacity: manualCode ? 1 : 0.5, padding: '12px 20px' }}>
+                  {t('lookupBill', locale)}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="scan-actions" style={{ marginTop: '16px' }}>
+            <button className="btn-pill btn-primary" style={{ width: 'auto', padding: '12px 24px' }}>
+              {Icons.barcodeScan} {t('scanBarcode', locale)}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -809,6 +1171,7 @@ function App() {
   const [locale, setLocale] = useState('en');
   const [selectedCurrency, setSelectedCurrency] = useState('GHS');
   const [showSendModal, setShowSendModal] = useState(false);
+  const [showBillsPage, setShowBillsPage] = useState(false);
   const [balanceHidden, setBalanceHidden] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
@@ -843,6 +1206,11 @@ function App() {
   ];
 
   const renderPage = () => {
+    // If bills page is open, show it over any tab
+    if (showBillsPage) {
+      return <PayBillsPage locale={locale} onBack={() => setShowBillsPage(false)} />;
+    }
+
     switch (activeTab) {
       case 'home':
         return (
@@ -851,6 +1219,7 @@ function App() {
             wallets={MOCK_WALLETS}
             transactions={MOCK_TRANSACTIONS}
             onSendClick={() => setShowSendModal(true)}
+            onPayBillsClick={() => setShowBillsPage(true)}
             selectedCurrency={selectedCurrency}
             onCurrencyChange={setSelectedCurrency}
             balanceHidden={balanceHidden}
@@ -860,7 +1229,7 @@ function App() {
       case 'activity':
         return <ActivityPage locale={locale} transactions={MOCK_TRANSACTIONS} />;
       case 'scan':
-        return <ScanPage locale={locale} />;
+        return <ScanPage locale={locale} user={MOCK_USER} />;
       case 'cards':
         return <CardsPage locale={locale} user={MOCK_USER} />;
       case 'profile':
@@ -920,7 +1289,7 @@ function App() {
           <button
             key={tab.id}
             className={`tab-item ${tab.isScan ? 'scan-tab' : ''} ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => { setActiveTab(tab.id); setShowBillsPage(false); }}
             id={`tab-${tab.id}`}
           >
             <span className={`tab-icon ${tab.isScan ? '' : ''}`}>
