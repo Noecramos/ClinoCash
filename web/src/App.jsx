@@ -1436,6 +1436,13 @@ function ProfilePage({ locale, user, onLocaleChange, theme, onThemeChange }) {
           <span className="profile-menu-label" style={{ color: 'var(--red)' }}>{t('logout', locale)}</span>
         </div>
       </div>
+
+      {/* Noviapp branding footer */}
+      <div className="profile-branding">
+        <div className="profile-branding-version">ClinoCash v1.0.0</div>
+        <div className="profile-branding-company">A Noviapp AI Systems Product</div>
+        <div className="profile-branding-copy">© 2026 All rights reserved</div>
+      </div>
     </div>
   );
 }
@@ -2136,6 +2143,12 @@ function PinLockScreen({ locale, onUnlock }) {
         <button className="pin-forgot" onClick={hapticClick(onUnlock)}>
           {t('forgotPin', locale)}
         </button>
+      </div>
+
+      {/* Noviapp branding */}
+      <div className="pin-branding">
+        <span className="pin-branding-powered">Powered by</span>
+        <span className="pin-branding-name">Noviapp AI Systems</span>
       </div>
     </div>
   );
