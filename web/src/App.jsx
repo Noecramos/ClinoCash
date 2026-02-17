@@ -166,6 +166,21 @@ const BILL_CATEGORIES = [
   },
 ];
 
+// ─── MOCK AGENTS (Accra + Lomé) ────────────────────────
+
+const MOCK_AGENTS = [
+  { id: 'a1', name: 'ClinoCash Agent — Osu Oxford St', type: 'Cash In/Out', lat: 5.5560, lng: -0.1820, phone: '+233241001001', hours: '7am–9pm' },
+  { id: 'a2', name: 'Kwame Corner Shop', type: 'Cash In', lat: 5.5615, lng: -0.1925, phone: '+233241002002', hours: '8am–6pm' },
+  { id: 'a3', name: 'Accra Mall Agent', type: 'Cash In/Out', lat: 5.6165, lng: -0.1755, phone: '+233241003003', hours: '9am–8pm' },
+  { id: 'a4', name: 'Circle Mobile Money', type: 'Cash In/Out', lat: 5.5720, lng: -0.2085, phone: '+233241004004', hours: '6am–10pm' },
+  { id: 'a5', name: 'Madina Market Agent', type: 'Cash In', lat: 5.6720, lng: -0.1680, phone: '+233241005005', hours: '7am–7pm' },
+  { id: 'a6', name: 'Kaneshie Station Agent', type: 'Cash Out', lat: 5.5630, lng: -0.2350, phone: '+233241006006', hours: '6am–9pm' },
+  { id: 'a7', name: 'Agent ClinoCash — Grand Marché Lomé', type: 'Cash In/Out', lat: 6.1310, lng: 1.2135, phone: '+22890001001', hours: '7h–20h' },
+  { id: 'a8', name: 'Tokoin Pharmacy Agent', type: 'Cash In', lat: 6.1415, lng: 1.2270, phone: '+22890002002', hours: '8h–18h' },
+  { id: 'a9', name: 'Bè Beach Agent', type: 'Cash In/Out', lat: 6.1255, lng: 1.2420, phone: '+22890003003', hours: '7h–21h' },
+  { id: 'a10', name: 'Université de Lomé Agent', type: 'Cash In/Out', lat: 6.1680, lng: 1.2120, phone: '+22890004004', hours: '8h–19h' },
+];
+
 // ─── ICONS (SVG inline for zero dependencies) ──────────
 
 const Icons = {
@@ -357,6 +372,29 @@ const Icons = {
       <rect x="2" y="14" width="8" height="8" rx="1" /><rect x="14" y="14" width="4" height="4" rx="1" />
       <line x1="22" y1="14" x2="22" y2="14.01" /><line x1="22" y1="18" x2="22" y2="22" />
       <line x1="18" y1="22" x2="18" y2="22.01" />
+    </svg>
+  ),
+  sun: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  ),
+  moon: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  ),
+  mapPin: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+    </svg>
+  ),
+  navigation: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="3 11 22 2 13 21 11 13 3 11" />
     </svg>
   ),
 };
@@ -1233,7 +1271,7 @@ function CardsPage({ locale, user }) {
   );
 }
 
-function ProfilePage({ locale, user, onLocaleChange }) {
+function ProfilePage({ locale, user, onLocaleChange, theme, onThemeChange, onFindAgent }) {
   const menuItems = [
     { icon: Icons.profile, label: t('personalInfo', locale) },
     { icon: Icons.shield, label: t('security', locale) },
@@ -1245,7 +1283,22 @@ function ProfilePage({ locale, user, onLocaleChange }) {
         </div>
       )
     },
+    {
+      icon: theme === 'dark' ? Icons.moon : Icons.sun,
+      label: locale === 'fr' ? 'Thème' : 'Theme',
+      extra: (
+        <div className="theme-toggle">
+          <button className={`theme-option ${theme === 'light' ? 'active' : ''}`} onClick={() => onThemeChange('light')}>
+            {Icons.sun}
+          </button>
+          <button className={`theme-option ${theme === 'dark' ? 'active' : ''}`} onClick={() => onThemeChange('dark')}>
+            {Icons.moon}
+          </button>
+        </div>
+      )
+    },
     { icon: Icons.bell, label: t('notifications', locale) },
+    { icon: Icons.mapPin, label: locale === 'fr' ? 'Trouver un Agent' : 'Find Agent', onClick: onFindAgent },
     { icon: Icons.link, label: t('linkedAccounts', locale) },
     { icon: Icons.headphones, label: t('helpSupport', locale) },
   ];
@@ -1264,7 +1317,7 @@ function ProfilePage({ locale, user, onLocaleChange }) {
       <div className="profile-menu">
         {menuItems.map((item, i) => (
           <div key={i}>
-            <div className="profile-menu-item">
+            <div className="profile-menu-item" onClick={item.onClick} style={item.onClick ? { cursor: 'pointer' } : {}}>
               <div className="profile-menu-icon">{item.icon}</div>
               <span className="profile-menu-label">{item.label}</span>
               {item.extra || <span className="profile-menu-arrow">{Icons.chevronRight}</span>}
@@ -1284,6 +1337,232 @@ function ProfilePage({ locale, user, onLocaleChange }) {
   );
 }
 
+// ─── ONBOARDING WALKTHROUGH ────────────────────────────
+
+function OnboardingWalkthrough({ locale, onComplete }) {
+  const [step, setStep] = useState(0);
+
+  const slides = [
+    {
+      emoji: '💸',
+      title: locale === 'fr' ? 'Bienvenue sur ClinoCash' : 'Welcome to ClinoCash',
+      desc: locale === 'fr'
+        ? 'Votre portefeuille numérique pour le Ghana et le Togo. Envoyez, recevez et gérez votre argent en toute simplicité.'
+        : 'Your digital wallet for Ghana and Togo. Send, receive, and manage money with ease.',
+      color: '#00C853',
+    },
+    {
+      emoji: '🚀',
+      title: locale === 'fr' ? 'Envoyez Instantanément' : 'Send Money Instantly',
+      desc: locale === 'fr'
+        ? 'Transférez de l\'argent à vos proches en quelques secondes. GHS, XOF et USD supportés.'
+        : 'Transfer money to loved ones in seconds. GHS, XOF, and USD supported.',
+      color: '#8B5CF6',
+    },
+    {
+      emoji: '🧾',
+      title: locale === 'fr' ? 'Payez vos Factures' : 'Pay Your Bills',
+      desc: locale === 'fr'
+        ? 'Électricité, eau, internet, crédit mobile — tout depuis votre téléphone.'
+        : 'Electricity, water, internet, airtime — all from your phone.',
+      color: '#FF9800',
+    },
+    {
+      emoji: '🔒',
+      title: locale === 'fr' ? 'Sécurisé et Fiable' : 'Secure & Reliable',
+      desc: locale === 'fr'
+        ? 'Vos transactions sont protégées par un chiffrement de bout en bout. Vos fonds sont en sécurité.'
+        : 'Your transactions are protected with end-to-end encryption. Your funds are safe.',
+      color: '#00C853',
+    },
+  ];
+
+  const handleNext = () => {
+    if (step < slides.length - 1) {
+      setStep(step + 1);
+    } else {
+      localStorage.setItem('clinocash_onboarded', 'true');
+      onComplete();
+    }
+  };
+
+  const handleSkip = () => {
+    localStorage.setItem('clinocash_onboarded', 'true');
+    onComplete();
+  };
+
+  const s = slides[step];
+
+  return (
+    <div className="onboarding-overlay">
+      <div className="onboarding-slide" key={step}>
+        <button className="onboarding-skip" onClick={handleSkip}>
+          {locale === 'fr' ? 'Passer' : 'Skip'}
+        </button>
+
+        <div className="onboarding-visual">
+          <div className="onboarding-emoji-ring" style={{ boxShadow: `0 0 60px ${s.color}30, 0 0 120px ${s.color}15` }}>
+            <span className="onboarding-emoji">{s.emoji}</span>
+          </div>
+        </div>
+
+        <div className="onboarding-text">
+          <h2 className="onboarding-title">{s.title}</h2>
+          <p className="onboarding-desc">{s.desc}</p>
+        </div>
+
+        <div className="onboarding-dots">
+          {slides.map((_, i) => (
+            <div key={i} className={`onboarding-dot ${i === step ? 'active' : ''}`} onClick={() => setStep(i)} />
+          ))}
+        </div>
+
+        <button className="btn-pill btn-primary onboarding-btn" onClick={handleNext}>
+          {step === slides.length - 1
+            ? (locale === 'fr' ? 'Commencer' : 'Get Started')
+            : (locale === 'fr' ? 'Suivant' : 'Next')
+          }
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── AGENT LOCATOR ─────────────────────────────────────
+
+function AgentLocator({ locale, onClose }) {
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [city, setCity] = useState('accra');
+
+  const filteredAgents = MOCK_AGENTS.filter(a =>
+    city === 'accra' ? a.lat < 6 : a.lat >= 6
+  );
+
+  useEffect(() => {
+    // Load Leaflet CSS
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link');
+      link.id = 'leaflet-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
+
+    // Load Leaflet JS
+    const loadMap = () => {
+      if (!window.L || !mapRef.current) return;
+
+      // Clean up existing map
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+
+      const center = city === 'accra' ? [5.5860, -0.1969] : [6.1375, 1.2225];
+      const map = window.L.map(mapRef.current, { zoomControl: false }).setView(center, 13);
+      mapInstanceRef.current = map;
+
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+
+      // Custom green icon
+      const agentIcon = window.L.divIcon({
+        html: '<div style="width:28px;height:28px;background:#00C853;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:12px;">📍</div>',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        className: '',
+      });
+
+      filteredAgents.forEach(agent => {
+        const marker = window.L.marker([agent.lat, agent.lng], { icon: agentIcon }).addTo(map);
+        marker.on('click', () => setSelectedAgent(agent));
+        marker.bindTooltip(agent.name, { direction: 'top', offset: [0, -16] });
+      });
+
+      // Zoom controls
+      window.L.control.zoom({ position: 'bottomright' }).addTo(map);
+    };
+
+    if (window.L) {
+      setTimeout(loadMap, 100);
+    } else {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => setTimeout(loadMap, 100);
+      document.body.appendChild(script);
+    }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [city]);
+
+  return (
+    <div className="agent-overlay">
+      <div className="agent-modal">
+        <div className="agent-header">
+          <button className="bills-back-btn" onClick={onClose}>{Icons.chevronRight}</button>
+          <h2 className="bills-title">{locale === 'fr' ? 'Trouver un Agent' : 'Find Agent'}</h2>
+        </div>
+
+        {/* City Toggle */}
+        <div className="scan-tabs" style={{ marginBottom: '16px' }}>
+          <button className={`scan-tab ${city === 'accra' ? 'active' : ''}`} onClick={() => { setCity('accra'); setSelectedAgent(null); }}>
+            🇬🇭 Accra
+          </button>
+          <button className={`scan-tab ${city === 'lome' ? 'active' : ''}`} onClick={() => { setCity('lome'); setSelectedAgent(null); }}>
+            🇹🇬 Lomé
+          </button>
+        </div>
+
+        {/* Map */}
+        <div ref={mapRef} className="agent-map" />
+
+        {/* Selected Agent Card */}
+        {selectedAgent && (
+          <div className="agent-info-card">
+            <div className="agent-info-header">
+              <div className="agent-info-pin">{Icons.mapPin}</div>
+              <div>
+                <div className="agent-info-name">{selectedAgent.name}</div>
+                <div className="agent-info-type">{selectedAgent.type}</div>
+              </div>
+            </div>
+            <div className="agent-info-details">
+              <div>📞 {selectedAgent.phone}</div>
+              <div>🕐 {selectedAgent.hours}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Agent List */}
+        <div className="agent-list">
+          {filteredAgents.map(agent => (
+            <div
+              key={agent.id}
+              className={`agent-list-item ${selectedAgent?.id === agent.id ? 'selected' : ''}`}
+              onClick={() => setSelectedAgent(agent)}
+            >
+              <div className="agent-list-pin">{Icons.mapPin}</div>
+              <div className="agent-list-info">
+                <div className="agent-list-name">{agent.name}</div>
+                <div className="agent-list-meta">{agent.type} · {agent.hours}</div>
+              </div>
+              <div className="agent-list-arrow">{Icons.chevronRight}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── MAIN APP ──────────────────────────────────────────
 
 function App() {
@@ -1295,6 +1574,15 @@ function App() {
   const [balanceHidden, setBalanceHidden] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('clinocash_onboarded'));
+  const [showAgentLocator, setShowAgentLocator] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem('clinocash_theme') || 'dark');
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('clinocash_theme', theme);
+  }, [theme]);
 
   // Listen for PWA install prompt
   useEffect(() => {
@@ -1353,7 +1641,7 @@ function App() {
       case 'cards':
         return <CardsPage locale={locale} user={MOCK_USER} />;
       case 'profile':
-        return <ProfilePage locale={locale} user={MOCK_USER} onLocaleChange={setLocale} />;
+        return <ProfilePage locale={locale} user={MOCK_USER} onLocaleChange={setLocale} theme={theme} onThemeChange={setTheme} onFindAgent={() => setShowAgentLocator(true)} />;
       default:
         return null;
     }
@@ -1427,6 +1715,16 @@ function App() {
           locale={locale}
           wallets={MOCK_WALLETS}
         />
+      )}
+
+      {/* Onboarding Walkthrough */}
+      {showOnboarding && (
+        <OnboardingWalkthrough locale={locale} onComplete={() => setShowOnboarding(false)} />
+      )}
+
+      {/* Agent Locator */}
+      {showAgentLocator && (
+        <AgentLocator locale={locale} onClose={() => setShowAgentLocator(false)} />
       )}
     </div>
   );
