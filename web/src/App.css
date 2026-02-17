@@ -367,22 +367,30 @@
 /* ─── QUICK ACTIONS ─────────────────────────────────── */
 
 .quick-actions {
-  display: flex;
-  gap: var(--space-sm);
   margin-top: var(--space-xl);
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding-bottom: 2px;
-  animation: fadeInUp var(--duration-slow) var(--ease-out);
-  animation-delay: 100ms;
-  animation-fill-mode: both;
+  overflow: hidden;
+  position: relative;
 }
 
-.quick-actions::-webkit-scrollbar {
-  display: none;
+.quick-actions-track {
+  display: flex;
+  gap: var(--space-sm);
+  width: max-content;
+  animation: scrollLoop 15s linear infinite;
+}
+
+.quick-actions-track.paused {
+  animation-play-state: paused;
+}
+
+@keyframes scrollLoop {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .quick-action-btn {
@@ -1740,7 +1748,12 @@
 /* ─── LIGHT THEME OVERRIDES ─────────────────────────── */
 
 [data-theme="light"] .app-header {
-  background: rgba(245, 248, 246, 0.92);
+  background: rgba(10, 26, 18, 0.95);
+}
+
+[data-theme="light"] .app-header .header-greeting span,
+[data-theme="light"] .app-header .header-icon-btn {
+  color: #FFFFFF;
 }
 
 [data-theme="light"] body::before {
@@ -2554,4 +2567,83 @@
 .agent-banner-arrow {
   color: var(--gray-500);
   flex-shrink: 0;
+}
+
+/* ─── INVITE FRIENDS TOAST ───────────────────────────── */
+
+.invite-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 420px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--surface-card);
+  border: 1px solid rgba(0, 200, 83, 0.2);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg), 0 0 30px rgba(0, 200, 83, 0.08);
+  z-index: 200;
+  animation: toastSlideUp 0.5s var(--ease-out);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+@keyframes toastSlideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.invite-toast-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.invite-toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.invite-toast-title {
+  font-weight: 700;
+  font-size: var(--text-sm);
+  margin-bottom: 2px;
+}
+
+.invite-toast-desc {
+  font-size: var(--text-xs);
+  color: var(--gray-400);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.invite-toast-close {
+  color: var(--gray-500);
+  padding: 4px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast);
+}
+
+.invite-toast-close:hover {
+  color: var(--white);
+  background: var(--surface-elevated);
 }

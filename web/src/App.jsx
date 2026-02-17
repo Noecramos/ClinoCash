@@ -550,14 +550,42 @@ function QuickActions({ locale, onSendClick, onPayBillsClick, onRequestClick, on
     { icon: <div className="quick-action-icon savings">{Icons.piggyBank}</div>, label: locale === 'fr' ? 'Épargne' : 'Savings', onClick: onSavingsClick },
   ];
 
+  const trackRef = useRef(null);
+  const resumeTimer = useRef(null);
+  const [paused, setPaused] = useState(false);
+
+  const pauseCarousel = useCallback(() => {
+    setPaused(true);
+    clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => setPaused(false), 3000);
+  }, []);
+
+  useEffect(() => {
+    return () => clearTimeout(resumeTimer.current);
+  }, []);
+
+  const handleClick = (action) => {
+    pauseCarousel();
+    action.onClick && action.onClick();
+  };
+
+  // Duplicate items for seamless loop
+  const allItems = [...actions, ...actions];
+
   return (
-    <div className="quick-actions">
-      {actions.map((action, i) => (
-        <button key={i} className="quick-action-btn" onClick={action.onClick}>
-          {action.icon}
-          <span className="quick-action-label">{action.label}</span>
-        </button>
-      ))}
+    <div
+      className="quick-actions"
+      onMouseEnter={pauseCarousel}
+      onTouchStart={pauseCarousel}
+    >
+      <div ref={trackRef} className={`quick-actions-track ${paused ? 'paused' : ''}`}>
+        {allItems.map((action, i) => (
+          <button key={i} className="quick-action-btn" onClick={() => handleClick(action)}>
+            {action.icon}
+            <span className="quick-action-label">{action.label}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -799,16 +827,6 @@ function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick,
           <div className="agent-banner-desc">{locale === 'fr' ? 'Points de dépôt/retrait proches' : 'Nearby cash-in / cash-out points'}</div>
         </div>
         <div className="agent-banner-arrow">{Icons.chevronRight}</div>
-      </div>
-
-      {/* Promo Banner */}
-      <div className="promo-banner">
-        <div className="promo-icon">{Icons.gift}</div>
-        <div className="promo-content">
-          <div className="promo-title">{t('promoTitle', locale)}</div>
-          <div className="promo-desc">{t('promoDesc', locale)}</div>
-        </div>
-        <div className="promo-arrow">{Icons.chevronRight}</div>
       </div>
 
       {/* Recent Transactions */}
@@ -1954,6 +1972,7 @@ function App() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showSavingsPage, setShowSavingsPage] = useState(false);
+  const [showInviteToast, setShowInviteToast] = useState(true);
 
   // Apply theme to document
   useEffect(() => {
@@ -2070,6 +2089,20 @@ function App() {
       <main className="app-content">
         {renderPage()}
       </main>
+
+      {/* Invite Friends Toast */}
+      {showInviteToast && (
+        <div className="invite-toast" id="invite-toast">
+          <div className="invite-toast-icon">🎁</div>
+          <div className="invite-toast-content">
+            <div className="invite-toast-title">{t('promoTitle', locale)}</div>
+            <div className="invite-toast-desc">{t('promoDesc', locale)}</div>
+          </div>
+          <button className="invite-toast-close" onClick={() => setShowInviteToast(false)}>
+            {Icons.close}
+          </button>
+        </div>
+      )}
 
       {/* Bottom Tab Bar */}
       <nav className="bottom-tab-bar" id="bottom-nav">
