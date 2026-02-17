@@ -558,45 +558,66 @@ function QuickActions({ locale, onSendClick, onPayBillsClick, onRequestClick, on
     { icon: <div className="quick-action-icon receive">{Icons.receive}</div>, label: t('receive', locale), onClick: onRequestClick },
     { icon: <div className="quick-action-icon topup">{Icons.topup}</div>, label: t('topUp', locale), onClick: () => { } },
     { icon: <div className="quick-action-icon bills">{Icons.electricity}</div>, label: t('payBills', locale), onClick: onPayBillsClick },
-    { icon: <div className="quick-action-icon savings">{Icons.piggyBank}</div>, label: locale === 'fr' ? 'Épargne' : 'Savings', onClick: onSavingsClick },
+    { icon: <div className="quick-action-icon savings">{Icons.piggyBank}</div>, label: locale === 'fr' ? 'Épargne' : t('savings', locale), onClick: onSavingsClick },
   ];
 
-  const trackRef = useRef(null);
+  const scrollRef = useRef(null);
+  const rafRef = useRef(null);
+  const pausedRef = useRef(false);
   const resumeTimer = useRef(null);
-  const [paused, setPaused] = useState(false);
 
-  const pauseCarousel = useCallback(() => {
-    setPaused(true);
-    clearTimeout(resumeTimer.current);
-    resumeTimer.current = setTimeout(() => setPaused(false), 3000);
-  }, []);
-
+  // Auto-scroll loop
   useEffect(() => {
-    return () => clearTimeout(resumeTimer.current);
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const speed = 0.5; // px per frame
+
+    const tick = () => {
+      if (!pausedRef.current && el) {
+        el.scrollLeft += speed;
+        // Reset seamlessly when past the first set
+        const oneSet = el.scrollWidth / 3;
+        if (el.scrollLeft >= oneSet * 2) {
+          el.scrollLeft -= oneSet;
+        }
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
   }, []);
+
+  const pause = () => {
+    pausedRef.current = true;
+    clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => { pausedRef.current = false; }, 3000);
+  };
 
   const handleClick = (action) => {
-    pauseCarousel();
+    haptic(10);
+    pause();
     action.onClick && action.onClick();
   };
 
-  // Duplicate items for seamless loop
-  const allItems = [...actions, ...actions];
+  // Triplicate for seamless looping
+  const allItems = [...actions, ...actions, ...actions];
 
   return (
     <div
       className="quick-actions"
-      onMouseEnter={pauseCarousel}
-      onTouchStart={pauseCarousel}
+      ref={scrollRef}
+      onTouchStart={pause}
+      onMouseDown={pause}
+      onWheel={pause}
     >
-      <div ref={trackRef} className={`quick-actions-track ${paused ? 'paused' : ''}`}>
-        {allItems.map((action, i) => (
-          <button key={i} className="quick-action-btn" onClick={() => handleClick(action)}>
-            {action.icon}
-            <span className="quick-action-label">{action.label}</span>
-          </button>
-        ))}
-      </div>
+      {allItems.map((action, i) => (
+        <button key={i} className="quick-action-btn" onClick={() => handleClick(action)}>
+          {action.icon}
+          <span className="quick-action-label">{action.label}</span>
+        </button>
+      ))}
     </div>
   );
 }

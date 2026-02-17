@@ -367,31 +367,21 @@
 /* ─── QUICK ACTIONS ─────────────────────────────────── */
 
 .quick-actions {
-  margin-top: var(--space-xl);
-  margin-bottom: var(--space-lg);
-  overflow: hidden;
-  position: relative;
-}
-
-.quick-actions-track {
   display: flex;
   gap: var(--space-sm);
-  width: max-content;
-  animation: scrollLoop 15s linear infinite;
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-lg);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
 }
 
-.quick-actions-track.paused {
-  animation-play-state: paused;
-}
-
-@keyframes scrollLoop {
-  0% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-50%);
-  }
+.quick-actions::-webkit-scrollbar {
+  display: none;
 }
 
 .quick-action-btn {
