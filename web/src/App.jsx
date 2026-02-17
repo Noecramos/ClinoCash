@@ -775,7 +775,7 @@ function SendMoneyModal({ onClose, locale, wallets }) {
 
 // ─── PAGES ─────────────────────────────────────────────
 
-function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick, onRequestClick, onSavingsClick, selectedCurrency, onCurrencyChange, balanceHidden, onToggleBalance }) {
+function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick, onRequestClick, onSavingsClick, onFindAgent, selectedCurrency, onCurrencyChange, balanceHidden, onToggleBalance }) {
   return (
     <>
       <BalanceCard
@@ -790,6 +790,16 @@ function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick,
 
       {/* Mini Statement */}
       <MiniStatement transactions={transactions} locale={locale} />
+
+      {/* Agent Locator Banner */}
+      <div className="agent-banner" onClick={onFindAgent}>
+        <div className="agent-banner-icon">{Icons.mapPin}</div>
+        <div className="agent-banner-content">
+          <div className="agent-banner-title">{locale === 'fr' ? 'Trouver un Agent' : 'Find an Agent'}</div>
+          <div className="agent-banner-desc">{locale === 'fr' ? 'Points de dépôt/retrait proches' : 'Nearby cash-in / cash-out points'}</div>
+        </div>
+        <div className="agent-banner-arrow">{Icons.chevronRight}</div>
+      </div>
 
       {/* Promo Banner */}
       <div className="promo-banner">
@@ -1997,6 +2007,7 @@ function App() {
             onPayBillsClick={() => setShowBillsPage(true)}
             onRequestClick={() => setShowRequestModal(true)}
             onSavingsClick={() => setShowSavingsPage(true)}
+            onFindAgent={() => setShowAgentLocator(true)}
             selectedCurrency={selectedCurrency}
             onCurrencyChange={setSelectedCurrency}
             balanceHidden={balanceHidden}

@@ -367,13 +367,22 @@
 /* ─── QUICK ACTIONS ─────────────────────────────────── */
 
 .quick-actions {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-md);
+  display: flex;
+  gap: var(--space-sm);
   margin-top: var(--space-xl);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
   animation: fadeInUp var(--duration-slow) var(--ease-out);
   animation-delay: 100ms;
   animation-fill-mode: both;
+}
+
+.quick-actions::-webkit-scrollbar {
+  display: none;
 }
 
 .quick-action-btn {
@@ -388,6 +397,9 @@
   transition: all var(--duration-base) var(--ease-out);
   position: relative;
   overflow: hidden;
+  min-width: 72px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
 }
 
 .quick-action-btn::before {
@@ -1144,10 +1156,6 @@
 }
 
 @media (max-width: 360px) {
-  .quick-actions {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .balance-amount {
     font-size: var(--text-3xl);
   }
@@ -2491,4 +2499,59 @@
 .mini-stat-value {
   font-size: var(--text-sm);
   font-weight: 700;
+}
+
+/* ─── AGENT BANNER (Home Page) ───────────────────────── */
+
+.agent-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--surface-card);
+  border: 1px solid rgba(0, 200, 83, 0.15);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-md);
+  cursor: pointer;
+  transition: all var(--duration-base) var(--ease-out);
+}
+
+.agent-banner:hover {
+  border-color: var(--cyan);
+  background: var(--surface-card-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-cyan);
+}
+
+.agent-banner-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  background: rgba(0, 200, 83, 0.12);
+  color: var(--cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.agent-banner-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.agent-banner-title {
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.agent-banner-desc {
+  font-size: var(--text-xs);
+  color: var(--gray-400);
+  margin-top: 2px;
+}
+
+.agent-banner-arrow {
+  color: var(--gray-500);
+  flex-shrink: 0;
 }
