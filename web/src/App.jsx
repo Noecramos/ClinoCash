@@ -2077,7 +2077,52 @@ function PinLockScreen({ locale, onUnlock }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
+  const [bioAvailable, setBioAvailable] = useState(false);
   const CORRECT_PIN = '1234';
+
+  // Check if biometrics are available
+  useEffect(() => {
+    (async () => {
+      try {
+        if (window.PublicKeyCredential) {
+          const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+          setBioAvailable(available);
+        }
+      } catch (e) { /* silent */ }
+    })();
+  }, []);
+
+  const handleBiometric = async () => {
+    haptic(10);
+    try {
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+
+      await navigator.credentials.create({
+        publicKey: {
+          challenge,
+          rp: { name: 'ClinoCash', id: window.location.hostname },
+          user: {
+            id: new Uint8Array(16),
+            name: 'kwame@clinocash.app',
+            displayName: 'Kwame Asante'
+          },
+          pubKeyCredParams: [{ alg: -7, type: 'public-key' }, { alg: -257, type: 'public-key' }],
+          authenticatorSelection: {
+            authenticatorAttachment: 'platform',
+            userVerification: 'required',
+            residentKey: 'preferred'
+          },
+          timeout: 60000
+        }
+      });
+
+      haptic([50, 30, 50]);
+      onUnlock();
+    } catch (e) {
+      console.log('Biometric auth cancelled or unavailable');
+    }
+  };
 
   const handleDigit = (digit) => {
     haptic(10);
@@ -2129,8 +2174,13 @@ function PinLockScreen({ locale, onUnlock }) {
               {n}
             </button>
           ))}
-          <button className="pin-key pin-bio" onClick={hapticClick(onUnlock)}>
-            🔑
+          <button className="pin-key pin-bio" onClick={handleBiometric} title={t('useBiometrics', locale)}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18.9 7a8 8 0 0 0-2.2-2.5" /><path d="M3.9 12a8 8 0 0 1 2.2-5.5" />
+              <path d="M12 20a8 8 0 0 0 6.9-4" /><path d="M12 12a4 4 0 0 0-4 4" />
+              <path d="M12 12a4 4 0 0 1 4 4" /><path d="M12 12V8" />
+              <circle cx="12" cy="12" r="1" fill="currentColor" />
+            </svg>
           </button>
           <button className="pin-key" onClick={() => handleDigit('0')}>
             0
@@ -2143,12 +2193,12 @@ function PinLockScreen({ locale, onUnlock }) {
         <button className="pin-forgot" onClick={hapticClick(onUnlock)}>
           {t('forgotPin', locale)}
         </button>
-      </div>
 
-      {/* Noviapp branding */}
-      <div className="pin-branding">
-        <span className="pin-branding-powered">Powered by</span>
-        <span className="pin-branding-name">Noviapp AI Systems</span>
+        {/* Noviapp branding */}
+        <div className="pin-branding">
+          <span className="pin-branding-powered">Powered by</span>
+          <span className="pin-branding-name">Noviapp AI Systems</span>
+        </div>
       </div>
     </div>
   );
