@@ -2,6 +2,8 @@ import { Prisma, TransactionType, TransactionStatus, Currency } from '@prisma/cl
 import prisma from '../../config/database';
 import { config } from '../../config';
 import { generateReference } from '../../utils/helpers';
+import { emtechAdapter, AccountType, UserKYCLevel, UserKYCStatus, FundingSource, TransferType, TransferChannel } from '../payment/adapters/emtech.adapter';
+import { v4 as uuidv4 } from 'uuid';
 
 // ─── TYPES ─────────────────────────────────────────────
 
@@ -256,6 +258,14 @@ export async function transferMoney(params: TransferParams): Promise<TransferRes
             timeout: 10000, // Max transaction duration
         });
 
+        // ── BoG Regulatory Reporting (async, non-blocking) ──
+        // If Emtech is configured and this is a cross-border transfer,
+        // report it to the Bank of Ghana sandbox.
+        if (emtechAdapter.isConfigured()) {
+            reportToBoG(result, senderUserId, receiverUserId, amount, fee.toNumber(), currency, type)
+                .catch((err: any) => console.error('[BoG Reporting] Failed (non-blocking):', err.message));
+        }
+
         return { success: true, transaction: result };
 
     } catch (error: any) {
@@ -351,4 +361,128 @@ export async function getTransactionByReference(reference: string) {
             ledgerEntries: true,
         },
     });
+}
+
+// ─── BOG REGULATORY REPORTING ─────────────────────────
+
+/**
+ * Asynchronously report a completed transfer to the Bank of Ghana
+ * via the Emtech regulatory sandbox.
+ *
+ * This is fire-and-forget — failures are logged but never
+ * block or roll back the actual ClinoCash transaction.
+ */
+async function reportToBoG(
+    transaction: any,
+    senderUserId: string,
+    receiverUserId: string,
+    amount: number,
+    fee: number,
+    currency: Currency,
+    type: TransactionType,
+): Promise<void> {
+    try {
+        // Fetch sender and receiver details for the report
+        const [sender, receiver] = await Promise.all([
+            prisma.user.findUnique({
+                where: { id: senderUserId },
+                select: {
+                    id: true, username: true, displayName: true, phone: true,
+                    kycTier: true, wallets: { where: { currency }, select: { id: true } },
+                },
+            }),
+            prisma.user.findUnique({
+                where: { id: receiverUserId },
+                select: {
+                    id: true, username: true, displayName: true, phone: true,
+                    kycTier: true, wallets: { where: { currency }, select: { id: true } },
+                },
+            }),
+        ]);
+
+        if (!sender || !receiver) {
+            console.warn('[BoG] Cannot report — sender or receiver not found');
+            return;
+        }
+
+        // Map ClinoCash KYC tiers to Emtech KYC levels
+        const kycLevelMap: Record<string, UserKYCLevel> = {
+            TIER_0: UserKYCLevel.MINIMUM,
+            TIER_1: UserKYCLevel.MEDIUM,
+            TIER_2: UserKYCLevel.ENHANCED,
+        };
+
+        // Determine country codes from currency
+        const countryMap: Record<string, { code: string; city: string; region: string }> = {
+            GHS: { code: 'GH', city: 'Accra', region: 'GH-AA' },
+            XOF: { code: 'TG', city: 'Lomé', region: 'TG-M' },
+            USD: { code: 'US', city: 'New York', region: 'US-NY' },
+        };
+
+        const senderCountry = countryMap[currency] || countryMap.GHS;
+        const receiverCountry = countryMap[currency] || countryMap.GHS;
+
+        const transferId = transaction.reference || transaction.id;
+        const eventIdBase = uuidv4();
+
+        // 1. Submit the remittance transfer report
+        await emtechAdapter.reportClinoCashTransfer({
+            transferId,
+            transferDatetime: new Date().toISOString(),
+            transferDeviceId: `clinocash-server-${process.env.NODE_ENV || 'dev'}`,
+            transferChannel: TransferChannel.MOBILE_APP,
+
+            senderUserId: sender.id,
+            senderAccountId: sender.wallets[0]?.id || sender.id,
+            senderAmount: amount,
+            senderCurrency: currency,
+            senderAccountType: AccountType.MOBILE_MONEY,
+            senderAccountProvider: 'ClinoCash',
+            senderCity: senderCountry.city,
+            senderRegion: senderCountry.region,
+            senderCountry: senderCountry.code,
+            senderKycLevel: kycLevelMap[sender.kycTier] || UserKYCLevel.MINIMUM,
+            senderKycStatus: UserKYCStatus.VERIFIED,
+            senderAdjustedAmount: amount - fee,
+
+            receiverUserId: receiver.id,
+            receiverAccountId: receiver.wallets[0]?.id || receiver.id,
+            receiverAmount: amount - fee,
+            receiverCurrency: currency,
+            receiverAccountType: AccountType.MOBILE_MONEY,
+            receiverAccountProvider: 'ClinoCash',
+            receiverCity: receiverCountry.city,
+            receiverRegion: receiverCountry.region,
+            receiverCountry: receiverCountry.code,
+            receiverKycLevel: kycLevelMap[receiver.kycTier] || UserKYCLevel.MINIMUM,
+            receiverKycStatus: UserKYCStatus.VERIFIED,
+
+            fee,
+            feeCurrency: currency,
+            fundingSource: FundingSource.WALLET,
+            transferType: TransferType.WALLET,
+        });
+
+        console.log(`[BoG] Remittance reported: ${transferId}`);
+
+        // 2. Submit INITIATED event
+        await emtechAdapter.reportInitiated(
+            transferId,
+            `${eventIdBase}-init`,
+            `${type} transfer initiated via ClinoCash`,
+        );
+
+        // 3. Submit SUCCESS event
+        await emtechAdapter.reportSuccess(
+            transferId,
+            `${eventIdBase}-success`,
+            `${type} transfer completed — ${amount} ${currency}`,
+        );
+
+        console.log(`[BoG] Transfer events reported: ${transferId}`);
+
+    } catch (error: any) {
+        // Never throw — this is fire-and-forget
+        console.error(`[BoG] Reporting failed for transfer: ${error.message}`);
+    }
 }

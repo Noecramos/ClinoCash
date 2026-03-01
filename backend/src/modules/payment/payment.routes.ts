@@ -68,7 +68,7 @@ router.post('/cash-in', authenticate, async (req: AuthRequest, res: Response): P
             network: body.network,
         });
 
-        res.json({ success: true, ...result });
+        res.json({ ...result, success: true });
     } catch (error: any) {
         if (error instanceof z.ZodError) {
             res.status(422).json({ success: false, error: 'Validation failed', details: error.errors });
@@ -99,7 +99,7 @@ router.post('/cash-out', authenticate, async (req: AuthRequest, res: Response): 
             network: body.network,
         });
 
-        res.json({ success: true, ...result });
+        res.json({ ...result, success: true });
     } catch (error: any) {
         if (error instanceof z.ZodError) {
             res.status(422).json({ success: false, error: 'Validation failed' });
@@ -114,7 +114,7 @@ router.get('/verify/:reference', authenticate, async (req: AuthRequest, res: Res
     try {
         const gateway = PaymentGatewayFactory.getGateway('GHS'); // Will be determined by txn
         const result = await gateway.verifyTransaction(req.params.reference);
-        res.json({ success: true, ...result });
+        res.json({ ...result, success: true });
     } catch (error) {
         res.status(500).json({ success: false, error: 'Verification failed' });
     }
@@ -126,7 +126,7 @@ router.post('/webhook/paystack', async (req, res: Response): Promise<void> => {
         const gateway = PaymentGatewayFactory.getGatewayByName('paystack')!;
         const result = await gateway.handleWebhook(req.body);
         // TODO: Update transaction status in database
-        res.json({ success: true, ...result });
+        res.json({ ...result, success: true });
     } catch (error) {
         res.status(500).json({ success: false });
     }
@@ -137,7 +137,7 @@ router.post('/webhook/flutterwave', async (req, res: Response): Promise<void> =>
         const gateway = PaymentGatewayFactory.getGatewayByName('flutterwave')!;
         const result = await gateway.handleWebhook(req.body);
         // TODO: Update transaction status in database
-        res.json({ success: true, ...result });
+        res.json({ ...result, success: true });
     } catch (error) {
         res.status(500).json({ success: false });
     }

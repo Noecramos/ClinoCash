@@ -1,0 +1,1440 @@
+<![CDATA[<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClinoCash — Bank Partnership Pitch Deck</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --navy-darkest: #060E0A;
+            --navy-dark: #0A1A12;
+            --navy: #0F2318;
+            --cyan: #00C853;
+            --cyan-light: #69F0AE;
+            --cyan-dark: #00A86B;
+            --cyan-glow: rgba(0, 200, 83, 0.3);
+            --white: #F8FAF9;
+            --gray-100: #E8ECE9;
+            --gray-300: #A0AFA6;
+            --gray-400: #708078;
+            --gold: #FFD700;
+            --purple: #8B5CF6;
+            --red: #FF6B6B;
+            --blue: #60A5FA;
+        }
+
+        html, body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--navy-darkest);
+            color: var(--white);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* ─── SLIDE CONTAINER ─────────────────────── */
+        .deck {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px 80px;
+            opacity: 0;
+            transform: translateX(60px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            pointer-events: none;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+        }
+
+        .slide.prev {
+            opacity: 0;
+            transform: translateX(-60px);
+        }
+
+        /* ─── BACKGROUND EFFECTS ──────────────────── */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 200, 83, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+            animation: float 12s ease-in-out infinite;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            bottom: -150px;
+            left: -150px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 168, 107, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -30px); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px var(--cyan-glow); }
+            50% { box-shadow: 0 0 40px var(--cyan-glow), 0 0 80px rgba(0,200,83,0.1); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ─── TYPOGRAPHY ──────────────────────────── */
+        .slide-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--cyan);
+            margin-bottom: 16px;
+        }
+
+        .slide-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--white) 0%, var(--gray-300) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .slide-title .accent {
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--cyan-light) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .slide-subtitle {
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: var(--gray-300);
+            line-height: 1.6;
+            max-width: 700px;
+            margin-bottom: 40px;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: 12px;
+        }
+
+        /* ─── GRID LAYOUTS ────────────────────────── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ─── CARDS ───────────────────────────────── */
+        .card {
+            background: rgba(15, 35, 24, 0.6);
+            border: 1px solid rgba(0, 200, 83, 0.12);
+            border-radius: 16px;
+            padding: 28px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 200, 83, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 8px;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: var(--gray-400);
+            line-height: 1.5;
+        }
+
+        /* ─── STAT CARDS ──────────────────────────── */
+        .stat-card {
+            background: rgba(15, 35, 24, 0.6);
+            border: 1px solid rgba(0, 200, 83, 0.12);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--cyan);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ─── TABLE ───────────────────────────────── */
+        .table-wrap {
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 200, 83, 0.12);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: rgba(0, 200, 83, 0.1);
+            color: var(--cyan);
+            font-weight: 700;
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--gray-100);
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        tr:hover td { background: rgba(0, 200, 83, 0.03); }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .badge-green { background: rgba(0,200,83,0.15); color: var(--cyan); }
+        .badge-gold { background: rgba(255,215,0,0.15); color: var(--gold); }
+        .badge-purple { background: rgba(139,92,246,0.15); color: var(--purple); }
+        .badge-blue { background: rgba(96,165,250,0.15); color: var(--blue); }
+
+        /* ─── FEATURE LIST ────────────────────────── */
+        .feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            color: var(--gray-100);
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(0, 200, 83, 0.15);
+            color: var(--cyan);
+            font-size: 0.7rem;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+
+        /* ─── ARCHITECTURE ────────────────────────── */
+        .arch-box {
+            background: rgba(15, 35, 24, 0.8);
+            border: 1px solid rgba(0, 200, 83, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .arch-box.highlight {
+            border-color: var(--cyan);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        .arch-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--cyan);
+            margin-bottom: 8px;
+        }
+
+        .arch-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .arch-desc {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+            margin-top: 4px;
+        }
+
+        .arch-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cyan);
+            font-size: 1.5rem;
+        }
+
+        /* ─── TIMELINE ────────────────────────────── */
+        .timeline {
+            display: flex;
+            gap: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-item {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 32px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background: rgba(0, 200, 83, 0.2);
+        }
+
+        .timeline-item:last-child::before { display: none; }
+
+        .timeline-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--cyan);
+            margin: 0 auto 16px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--navy-darkest);
+        }
+
+        .timeline-week {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .timeline-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 4px;
+        }
+
+        .timeline-desc {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+        }
+
+        /* ─── PROGRESS BAR ────────────────────────── */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--cyan-light));
+            transition: width 0.4s ease;
+            z-index: 100;
+        }
+
+        /* ─── SLIDE COUNTER ───────────────────────── */
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gray-400);
+            z-index: 100;
+        }
+
+        .slide-counter .current {
+            color: var(--cyan);
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        /* ─── NAV ARROWS ──────────────────────────── */
+        .nav-arrows {
+            position: fixed;
+            bottom: 30px;
+            left: 40px;
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 200, 83, 0.2);
+            background: rgba(15, 35, 24, 0.8);
+            color: var(--cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 200, 83, 0.1);
+            border-color: var(--cyan);
+        }
+
+        /* ─── LOGO ────────────────────────────────── */
+        .logo-badge {
+            position: fixed;
+            top: 24px;
+            left: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .logo-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--cyan);
+            box-shadow: 0 0 10px var(--cyan-glow);
+        }
+
+        .logo-text {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--gray-300);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* ─── COVER SLIDE ─────────────────────────── */
+        .cover-title {
+            font-size: 5rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 16px;
+            letter-spacing: -2px;
+        }
+
+        .cover-title .clino {
+            color: var(--white);
+        }
+
+        .cover-title .cash {
+            color: var(--cyan);
+        }
+
+        .cover-tagline {
+            font-size: 1.4rem;
+            color: var(--gray-300);
+            font-weight: 400;
+            margin-bottom: 40px;
+        }
+
+        .cover-meta {
+            display: flex;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .cover-meta-item {
+            border-left: 2px solid var(--cyan);
+            padding-left: 16px;
+        }
+
+        .cover-meta-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gray-400);
+            margin-bottom: 4px;
+        }
+
+        .cover-meta-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        /* ─── CTA SLIDE ───────────────────────────── */
+        .cta-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .cta-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--gray-300);
+            margin-bottom: 50px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .cta-btn {
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .cta-primary {
+            background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+            color: var(--navy-darkest);
+        }
+
+        .cta-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px var(--cyan-glow);
+        }
+
+        .cta-secondary {
+            background: transparent;
+            border: 2px solid rgba(0, 200, 83, 0.3);
+            color: var(--cyan);
+        }
+
+        .cta-secondary:hover {
+            border-color: var(--cyan);
+            background: rgba(0, 200, 83, 0.05);
+        }
+
+        /* ─── RESPONSIVE: SMALL DESKTOP (≤1280px) ── */
+        @media (max-width: 1280px) {
+            .slide { padding: 50px 60px; }
+            .cover-title { font-size: 4rem; }
+            .slide-title { font-size: 2.8rem; }
+            .stat-value { font-size: 2.2rem; }
+            .cta-title { font-size: 3rem; }
+        }
+
+        /* ─── RESPONSIVE: TABLET (≤1024px) ────────── */
+        @media (max-width: 1024px) {
+            .slide { padding: 40px 40px 80px; }
+            .cover-title { font-size: 3.5rem; }
+            .slide-title { font-size: 2.2rem; }
+            .slide-subtitle { font-size: 1.05rem; margin-bottom: 24px; }
+            .cta-title { font-size: 2.5rem; }
+            .cta-subtitle { font-size: 1rem; margin-bottom: 30px; }
+
+            .grid-4 { grid-template-columns: 1fr 1fr; }
+            .grid-3 { grid-template-columns: 1fr 1fr; gap: 16px; }
+            .grid-2 { gap: 20px; }
+
+            .cover-meta { flex-wrap: wrap; gap: 20px; }
+            .cover-tagline { font-size: 1.15rem; }
+
+            .stat-value { font-size: 2rem; }
+            .stat-label { font-size: 0.7rem; }
+
+            .card { padding: 20px; }
+            .card-icon { width: 40px; height: 40px; font-size: 1.2rem; margin-bottom: 10px; }
+            .card-desc { font-size: 0.8rem; }
+
+            .arch-title { font-size: 0.85rem; }
+            .arch-desc { font-size: 0.7rem; }
+
+            /* Architecture 5-col grid → stacked */
+            .slide .arch-flow {
+                grid-template-columns: 1fr !important;
+            }
+
+            .timeline { flex-wrap: wrap; }
+            .timeline-item { flex: 1 1 45%; min-width: 140px; }
+            .timeline-item::before { display: none; }
+
+            .feature-list li { font-size: 0.8rem; gap: 8px; }
+            .feature-list li::before { width: 18px; height: 18px; font-size: 0.6rem; }
+
+            table { font-size: 0.75rem; }
+            th { padding: 8px 10px; font-size: 0.65rem; }
+            td { padding: 8px 10px; }
+        }
+
+        /* ─── RESPONSIVE: SMALL TABLET (≤768px) ──── */
+        @media (max-width: 768px) {
+            .slide { padding: 30px 24px 80px; justify-content: flex-start; padding-top: 60px; }
+            .cover-title { font-size: 2.8rem; letter-spacing: -1px; }
+            .slide-title { font-size: 1.8rem; margin-bottom: 16px; }
+            .slide-subtitle { font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5; }
+            .slide-tag { font-size: 0.65rem; letter-spacing: 2px; margin-bottom: 10px; }
+            .cta-title { font-size: 2rem; }
+            .cta-subtitle { font-size: 0.9rem; margin-bottom: 24px; }
+
+            h3 { font-size: 0.95rem; margin-bottom: 8px; }
+
+            .grid-2 { grid-template-columns: 1fr; gap: 16px; }
+            .grid-3 { grid-template-columns: 1fr; gap: 14px; }
+            .grid-4 { grid-template-columns: 1fr 1fr; gap: 12px; }
+
+            .cover-tagline { font-size: 1rem; margin-bottom: 24px; }
+            .cover-tagline br { display: none; }
+            .cover-meta { flex-direction: column; gap: 12px; }
+            .cover-meta-item { padding-left: 12px; }
+            .cover-meta-label { font-size: 0.6rem; }
+            .cover-meta-value { font-size: 0.85rem; }
+
+            .stat-card { padding: 16px; }
+            .stat-value { font-size: 1.8rem; }
+            .stat-label { font-size: 0.65rem; }
+
+            .card { padding: 16px; border-radius: 12px; }
+            .card-icon { width: 36px; height: 36px; font-size: 1rem; margin-bottom: 8px; border-radius: 8px; }
+            .card-title { font-size: 0.9rem; margin-bottom: 4px; }
+            .card-desc { font-size: 0.75rem; }
+
+            .arch-box { padding: 14px; border-radius: 10px; }
+            .arch-label { font-size: 0.6rem; letter-spacing: 1px; margin-bottom: 4px; }
+            .arch-title { font-size: 0.8rem; }
+            .arch-desc { font-size: 0.65rem; }
+            .arch-arrow { font-size: 1.2rem; }
+
+            /* Architecture 5-col → vertical stack */
+            [style*="grid-template-columns: 1fr auto 1fr auto 1fr"] {
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
+            }
+            .arch-arrow { transform: rotate(90deg) !important; }
+
+            .timeline { flex-direction: column; gap: 0; }
+            .timeline-item { flex: none; text-align: left; padding: 12px 12px 12px 40px; position: relative; }
+            .timeline-item::before { display: none; }
+            .timeline-dot { position: absolute; left: 0; top: 12px; margin: 0; width: 28px; height: 28px; }
+            .timeline-week { font-size: 0.6rem; }
+            .timeline-title { font-size: 0.8rem; }
+            .timeline-desc { font-size: 0.7rem; }
+
+            .cta-buttons { flex-direction: column; gap: 12px; align-items: center; }
+            .cta-btn { width: 100%; max-width: 300px; padding: 14px 30px; font-size: 0.9rem; }
+
+            .feature-list { gap: 6px; }
+            .feature-list li { font-size: 0.75rem; }
+
+            .table-wrap { border-radius: 10px; overflow-x: auto; }
+            table { font-size: 0.7rem; min-width: 280px; }
+            th { padding: 8px; font-size: 0.6rem; letter-spacing: 0.5px; }
+            td { padding: 6px 8px; }
+
+            .logo-badge { top: 12px; left: 16px; }
+            .logo-text { font-size: 0.7rem; letter-spacing: 1px; }
+            .logo-dot { width: 8px; height: 8px; }
+
+            .nav-arrows { bottom: 16px; left: 16px; }
+            .nav-btn { width: 36px; height: 36px; font-size: 1rem; border-radius: 8px; }
+
+            .slide-counter { bottom: 20px; right: 16px; font-size: 0.7rem; }
+            .slide-counter .current { font-size: 0.9rem; }
+
+            /* CTA slide meta on mobile */
+            #slide-12 > div:last-child {
+                flex-direction: column !important;
+                gap: 16px !important;
+            }
+        }
+
+        /* ─── RESPONSIVE: PHONE (≤480px) ─────────── */
+        @media (max-width: 480px) {
+            .slide { padding: 20px 16px 72px; padding-top: 50px; }
+            .cover-title { font-size: 2.2rem; }
+            .slide-title { font-size: 1.5rem; line-height: 1.2; margin-bottom: 12px; }
+            .slide-subtitle { font-size: 0.85rem; margin-bottom: 16px; }
+            .slide-tag { font-size: 0.6rem; letter-spacing: 1.5px; margin-bottom: 8px; }
+            .cta-title { font-size: 1.6rem; }
+            .cta-subtitle { font-size: 0.8rem; }
+
+            h3 { font-size: 0.85rem; }
+
+            .grid-4 { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .grid-3 { gap: 10px; }
+            .grid-2 { gap: 12px; }
+
+            .cover-tagline { font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5; }
+
+            .stat-card { padding: 12px 8px; border-radius: 10px; }
+            .stat-value { font-size: 1.5rem; }
+            .stat-label { font-size: 0.55rem; letter-spacing: 0; }
+
+            .card { padding: 14px; }
+            .card-icon { width: 32px; height: 32px; font-size: 0.9rem; margin-bottom: 6px; }
+            .card-title { font-size: 0.8rem; }
+            .card-desc { font-size: 0.7rem; line-height: 1.4; }
+
+            .arch-box { padding: 10px; }
+            .arch-title { font-size: 0.75rem; }
+            .arch-desc { font-size: 0.6rem; }
+            .arch-label { font-size: 0.55rem; }
+
+            .feature-list li { font-size: 0.7rem; gap: 6px; }
+            .feature-list li::before { width: 16px; height: 16px; font-size: 0.5rem; }
+
+            table { font-size: 0.65rem; }
+
+            .badge { padding: 2px 6px; font-size: 0.6rem; }
+
+            .logo-badge { top: 8px; left: 12px; gap: 6px; }
+            .logo-text { font-size: 0.6rem; }
+            .logo-dot { width: 6px; height: 6px; }
+
+            .nav-arrows { bottom: 12px; left: 12px; gap: 6px; }
+            .nav-btn { width: 32px; height: 32px; font-size: 0.9rem; }
+
+            .slide-counter { bottom: 16px; right: 12px; font-size: 0.65rem; }
+            .slide-counter .current { font-size: 0.8rem; }
+
+            .cta-btn { padding: 12px 24px; font-size: 0.85rem; }
+
+            /* Reduce background effect blobs on phone */
+            .slide::before { width: 300px; height: 300px; top: -100px; right: -100px; }
+            .slide::after { width: 200px; height: 200px; bottom: -80px; left: -80px; }
+        }
+
+        /* ─── RESPONSIVE: VERY SMALL PHONE (≤360px) ── */
+        @media (max-width: 360px) {
+            .slide { padding: 16px 12px 68px; padding-top: 44px; }
+            .cover-title { font-size: 1.8rem; }
+            .slide-title { font-size: 1.3rem; }
+            .slide-subtitle { font-size: 0.78rem; }
+            .cta-title { font-size: 1.4rem; }
+            .stat-value { font-size: 1.3rem; }
+            .grid-4 { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .stat-card { padding: 10px 6px; }
+            .card { padding: 10px; }
+        }
+
+        /* ─── LANDSCAPE PHONE ────────────────────── */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .slide { padding: 16px 40px 60px; padding-top: 36px; justify-content: flex-start; }
+            .slide-title { font-size: 1.5rem; margin-bottom: 8px; }
+            .slide-subtitle { font-size: 0.8rem; margin-bottom: 12px; }
+            .slide-tag { margin-bottom: 4px; }
+            .cover-title { font-size: 2.5rem; }
+            .cover-tagline { font-size: 0.85rem; margin-bottom: 12px; }
+            .cover-meta { gap: 16px; margin-top: 8px; }
+            .grid-3 { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+            .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+            .stat-card { padding: 10px; }
+            .stat-value { font-size: 1.5rem; }
+            .card { padding: 12px; }
+            .card-icon { width: 28px; height: 28px; font-size: 0.8rem; margin-bottom: 4px; }
+            .arch-box { padding: 10px; }
+            .cta-title { font-size: 1.8rem; }
+        }
+
+        /* ─── PRINT ───────────────────────────────── */
+        @media print {
+            .slide { 
+                position: relative; 
+                opacity: 1; 
+                transform: none;
+                pointer-events: all;
+                page-break-after: always;
+                height: 100vh;
+                padding: 40px;
+            }
+            .progress-bar, .slide-counter, .nav-arrows, .logo-badge { display: none; }
+            .grid-2 { grid-template-columns: 1fr 1fr; }
+            .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="logo-badge">
+        <div class="logo-dot"></div>
+        <div class="logo-text">ClinoCash</div>
+    </div>
+
+    <div class="slide-counter">
+        <span class="current" id="currentSlide">01</span> / <span id="totalSlides">12</span>
+    </div>
+
+    <div class="nav-arrows">
+        <button class="nav-btn" onclick="prevSlide()">←</button>
+        <button class="nav-btn" onclick="nextSlide()">→</button>
+    </div>
+
+    <div class="deck">
+
+        <!-- ════════════════════ SLIDE 1: COVER ════════════════════ -->
+        <div class="slide active" id="slide-1">
+            <div class="slide-tag">Bank Partnership Opportunity</div>
+            <div class="cover-title">
+                <span class="clino">Clino</span><span class="cash">Cash</span>
+            </div>
+            <div class="cover-tagline">
+                The white-label digital payment platform built for<br>
+                West African financial institutions.
+            </div>
+            <div class="cover-meta">
+                <div class="cover-meta-item">
+                    <div class="cover-meta-label">Markets</div>
+                    <div class="cover-meta-value">Ghana · Togo · West Africa</div>
+                </div>
+                <div class="cover-meta-item">
+                    <div class="cover-meta-label">Currencies</div>
+                    <div class="cover-meta-value">GHS · XOF · USD</div>
+                </div>
+                <div class="cover-meta-item">
+                    <div class="cover-meta-label">Compliance</div>
+                    <div class="cover-meta-value">BoG Emtech Sandbox Integrated</div>
+                </div>
+                <div class="cover-meta-item">
+                    <div class="cover-meta-label">Date</div>
+                    <div class="cover-meta-value">February 2026</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════ SLIDE 2: PROBLEM ════════════════════ -->
+        <div class="slide" id="slide-2">
+            <div class="slide-tag">The Opportunity</div>
+            <div class="slide-title">West Africa's $50B+ <span class="accent">digital payment gap</span></div>
+            <div class="slide-subtitle">Banks need a mobile-first solution that's affordable, compliant, and speaks the local languages.</div>
+
+            <div class="grid-4">
+                <div class="stat-card">
+                    <div class="stat-value">60%+</div>
+                    <div class="stat-label">Mobile Money Penetration (Ghana)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">33M</div>
+                    <div class="stat-label">Ghana Population</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">8M+</div>
+                    <div class="stat-label">Togo Population</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">Local Languages Supported</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════ SLIDE 3: SOLUTION ════════════════════ -->
+        <div class="slide" id="slide-3">
+            <div class="slide-tag">Our Solution</div>
+            <div class="slide-title">A complete <span class="accent">digital banking platform</span> in a box</div>
+            <div class="slide-subtitle">Deploy your branded mobile payment app in 4 weeks — not 12 months.</div>
+
+            <div class="grid-3">
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(0,200,83,0.12);">💸</div>
+                    <div class="card-title">P2P Transfers</div>
+                    <div class="card-desc">Instant person-to-person payments with username, phone, or QR code. Multi-currency with real-time exchange.</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(139,92,246,0.12);">🌍</div>
+                    <div class="card-title">Cross-Border Remittance</div>
+                    <div class="card-desc">Ghana ↔ Togo corridor. GHS to XOF real-time with BoG regulatory auto-reporting.</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(96,165,250,0.12);">📱</div>
+                    <div class="card-title">Bill Payments</div>
+                    <div class="card-desc">28+ providers — electricity, water, airtime, education, government. Ghana + Togo coverage.</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(255,215,0,0.12);">💳</div>
+                    <div class="card-title">Virtual Cards & NFC</div>
+                    <div class="card-desc">Virtual card issuance for online payments. NFC tap-to-pay at POS terminals.</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(255,107,107,0.12);">🎯</div>
+                    <div class="card-title">Savings Goals</div>
+                    <div class="card-desc">Goal-based savings with visual tracking. Drive deposits and customer engagement.</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(0,200,83,0.12);">📍</div>
+                    <div class="card-title">Agent Network</div>
+                    <div class="card-desc">GPS-based agent locator. Cash-in/cash-out across Accra and Lomé with 10+ agent points.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════ SLIDE 4: ARCHITECTURE ════════════════════ -->
+        <div class="slide" id="slide-4">
+            <div class="slide-tag">Technology</div>
+            <div class="slide-title">Bank-grade <span class="accent">architecture</span></div>
+            <div class="slide-subtitle">Double-entry bookkeeping, atomic transactions, and full audit trail.</div>
+
+            <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 16px; align-items: center; position: relative; z-index: 1;">
+                <div class="arch-box highlight">
+                    <div class="arch-label">Frontend</div>
+                    <div class="arch-title">React PWA</div>
+                    <div class="arch-desc">Mobile-first · Installable · Offline</div>
+                </div>
+                <div class="arch-arrow">→</div>
+                <div class="arch-box highlight">
+                    <div class="arch-label">Backend</div>
+                    <div class="arch-title">Express + TypeScript</div>
+                    <div class="arch-desc">REST API · JWT Auth · Rate Limiting</div>
+                </div>
+                <div class="arch-arrow">→</div>
+                <div class="arch-box highlight">
+                    <div class="arch-label">Database</div>
+                    <div class="arch-title">PostgreSQL + Prisma</div>
+                    <div class="arch-desc">Double-Entry Ledger · SERIALIZABLE</div>
+                </div>
+            </div>
+
+            <div style="height: 24px;"></div>
+
+            <div class="grid-3">
+                <div class="arch-box">
+                    <div class="arch-label">Payment</div>
+                    <div class="arch-title">Paystack · Flutterwave · Hubtel</div>
+                    <div class="arch-desc">Cards · Mobile Money · Bank Transfer</div>
+                </div>
+                <div class="arch-box">
+                    <div class="arch-label">Compliance</div>
+                    <div class="arch-title">BoG Emtech v2.0</div>
+                    <div class="arch-desc">Auto-reporting · KYC · Audit</div>
+                </div>
+                <div class="arch-box">
+                    <div class="arch-label">Security</div>
+                    <div class="arch-title">AES-256 · JWT · OTP</div>
+                    <div class="arch-desc">PCI-DSS Ready · Helmet · CORS</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════ SLIDE 5: MULTI-CURRENCY ════════════════════ -->
+        <div class="slide" id="slide-5">
+            <div class="slide-tag">Multi-Currency</div>
+            <div class="slide-title">Three wallets. <span class="accent">One account.</span></div>
+            <div class="slide-subtitle">Every user gets GHS, XOF, and USD wallets with real-time exchange rates.</div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>Currency</th><th>Symbol</th><th>Market</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>🇬🇭 Ghanaian Cedi</td><td><span class="badge badge-green">GHS</span></td><td>Ghana</td></tr>
+                                <tr><td>🇹🇬 CFA Franc</td><td><span class="badge badge-gold">XOF</span></td><td>Togo / WAEMU</td></tr>
+                                <tr><td>🇺🇸 US Dollar</td><td><span class="badge badge-blue">USD</span></td><td>International</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="height: 20px;"></div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>Pair</th><th>Rate</th><th>Example</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>GHS → XOF</td><td>38.50</td><td>GH₵ 100 = CFA 3,850</td></tr>
+                                <tr><td>GHS → USD</td><td>0.063</td><td>GH₵ 100 = $6.30</td></tr>
+                                <tr><td>XOF → GHS</td><td>0.026</td><td>CFA 10K = GH₵ 260</td></tr>
+                                <tr><td>USD → GHS</td><td>15.85</td><td>$100 = GH₵ 1,585</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <h3>Wallet Features</h3>
+                    <ul class="feature-list">
+                        <li>Auto-created at registration (GHS + XOF + USD)</li>
+                        <li>Decimal(19,4) precision for financial accuracy</li>
+                        <li>Optimistic locking — prevents concurrent corruption</li>
+                        <li>Balance hide/show for privacy</li>
+                        <li>Real-time animated balance counter</li>
+                        <li>Wallet freeze/unfreeze capability</li>
+                        <li>Full audit trail per wallet</li>
+                    </ul>
+
+                    <div style="height: 20px;"></div>
+
+                    <h3>Double-Entry Ledger</h3>
+                    <ul class="feature-list">
+                        <li>Every transfer → DEBIT + CREDIT entries</li>
+                        <li>balanceBefore / balanceAfter on each entry</li>
+                        <li>100% reconcilable at any point in time</li>
+                        <li>Immutable records — no deletion</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════ SLIDE 6: COMPLIANCE ════════════════════ -->
+        <div class="slide" id="slide-6">
+            <div class="slide-tag">Regulatory Compliance</div>
+            <div class="slide-title"><span class="accent">Bank of Ghana</span> ready — out of the box</div>
+            <div class="slide-subtitle">Pre-integrated with BoG's Emtech regulatory sandbox for automatic remittance reporting.</div>
+
+            <div class="grid-2">
+                <div>
+                    <h3>Automatic Reporting Flow</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div class="arch-box"><div class="arch-title">1. User sends GHS → XOF transfer</div></div>
+                        <div class="arch-arrow" style="transform: rotate(90deg);">→</div>
+                        <div class="arch-box"><div class="arch-title">2. Transaction completes atomically</div></div>
+                        <div class="arch-arrow" style="transform: rotate(90deg);">→</div>
+                        <div class="arch-box highlight"><div class="arch-title">3. Auto-report to BoG (async)</div><div class="arch-desc">POST /compliance/v2/remittances</div></div>
+                        <div class="arch-arrow" style="transform: rotate(90deg);">→</div>
+                        <div class="arch-box highlight"><div class="arch-title">4. Lifecycle events sent</div><div class="arch-desc">INITIATED → SUCCESS / FAILED</div></div>
+                    </div>
+                </div>
+                <div>
+                    <h3>KYC Tiered System</h3>
+                    <div class="table-wrap" style="margin-bottom: 20px;">
+                        <table>
+                            <thead><tr><th>Tier</th><th>Requirement</th><th>Daily Limit</th></tr></thead>
+                            <tbody>
+                                <tr><td><span class="badge badge-gold">TIER 0</span></td><td>Phone only</td><td>GH₵ 500</td></tr>
+                                <tr><td><span class="badge badge-blue">TIER 1</span></td><td>Phone + ID</td><td>GH₵ 5,000</td></tr>
+                                <tr><td><span class="badge badge-green">TIER 2</span></td><td>Full KYC</td><td>GH₵ 50,000</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>BoG Data Submitted</h3>
+                    <ul class="feature-list">
+                        <li>Sender & receiver KYC profiles</li>
+                        <li>Transfer amount, fees, channel</li>
+                        <li>Account type & provider details</li>
+                        <li>Geographic data (city, region, country)</li>
+                        <li>Transfer lifecycle events</li>
+                        <li>Device & IP information</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════ SLIDE 7: LOCALIZATION ════════════════════ -->
+        <div class="slide" id="slide-7">
+            <div class="slide-tag">Localization</div>
+            <div class="slide-title">5 languages. <span class="accent">90%+ coverage.</span></div>
+            <div class="slide-subtitle">Every screen, button, and message is fully translated for the Ghana–Togo market.</div>
+
+            <div class="grid-2">
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Language</th><th>Code</th><th>Coverage</th><th>Market</th></tr></thead>
+                        <tbody>
+                            <tr><td>🇬🇧 English</td><td>en</td><td><span class="badge badge-green">Full</span></td><td>Ghana (official)</td></tr>
+                            <tr><td>🇫🇷 French</td><td>fr</td><td><span class="badge badge-green">Full</span></td><td>Togo (official)</td></tr>
+                            <tr><td>🇬🇭 Ewe (Eʋegbe)</td><td>ee</td><td><span class="badge badge-green">Full</span></td><td>Volta + S. Togo</td></tr>
+                            <tr><td>🇬🇭 Twi (Akan)</td><td>tw</td><td><span class="badge badge-green">Full</span></td><td>Ashanti + Accra</td></tr>
+                            <tr><td>🇳🇬 Hausa</td><td>ha</td><td><span class="badge badge-green">Full</span></td><td>Northern Ghana</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h3>What's Translated</h3>
+                    <ul class="feature-list">
+                        <li>All navigation and menu labels</li>
+                        <li>Form fields and placeholder text</li>
+                        <li>Transaction types and status messages</li>
+                        <li>Error messages and alerts</li>
+                        <li>Time-based greetings (morning/afternoon/evening)</li>
+                        <li>Currency formatting (symbol + separator)</li>
+                        <li>Bill categories and provider names</li>
+                        <li>Onboarding walkthrough slides</li>
+                    </ul>
+
+                    <div style="height: 20px;"></div>
+
+                    <h3>Greeting Examples</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Time</th><th>EN</th><th>FR</th><th>TW</th></tr></thead>
+                            <tbody>
+                                <tr><td>AM</td><td>Good morning</td><td>Bonjour</td><td>Maakye</td></tr>
+                                <tr><td>PM</td><td>Good afternoon</td><td>Bon après-midi</td><td>Maaha</td></tr>
+                                <tr><td>Eve</td><td>Good evening</td><td>Bonsoir</td><td>Maadwo</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════ SLIDE 8: SECURITY ════════════════════ -->
+        <div class="slide" id="slide-8">
+            <div class="slide-tag">Security</div>
+            <div class="slide-title">Bank-grade <span class="accent">security</span> at every layer</div>
+            <div class="slide-subtitle">Built for PCI-DSS compliance with defense-in-depth approach.</div>
+
+            <div class="grid-3">
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(0,200,83,0.12);">🔐</div>
+                    <div class="card-title">Authentication</div>
+                    <ul class="feature-list">
+                        <li>4-digit PIN (AES-256 encrypted)</li>
+                        <li>Biometric (Face ID / Fingerprint)</li>
+                        <li>OTP verification (hashed, 3 max)</li>
+                        <li>JWT tokens with 7-day expiry</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(139,92,246,0.12);">🛡️</div>
+                    <div class="card-title">Transaction Safety</div>
+                    <ul class="feature-list">
+                        <li>Idempotency keys (no double-spend)</li>
+                        <li>SERIALIZABLE PostgreSQL isolation</li>
+                        <li>Optimistic locking on wallets</li>
+                        <li>Immutable audit log</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(96,165,250,0.12);">🌐</div>
+                    <div class="card-title">API Protection</div>
+                    <ul class="feature-list">
+                        <li>Helmet.js (HTTP headers)</li>
+                        <li>CORS with origin whitelist</li>
+                        <li>Rate limiting (100/15m API, 10/15m auth)</li>
+                        <li>10KB max request body</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════ SLIDE 9: FEES ════════════════════ -->
+        <div class="slide" id="slide-9">
+            <div class="slide-tag">Revenue Model</div>
+            <div class="slide-title">Configurable <span class="accent">fee engine</span></div>
+            <div class="slide-subtitle">Banks set their own fee schedule. Every percentage point is customizable.</div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Transaction Type</th><th>Default Fee</th><th>Example (₵1,000)</th></tr></thead>
+                            <tbody>
+                                <tr><td>P2P Transfer</td><td>0.5%</td><td>GH₵ 5.00</td></tr>
+                                <tr><td>Cash In (MoMo → Wallet)</td><td><span class="badge badge-green">FREE</span></td><td>GH₵ 0.00</td></tr>
+                                <tr><td>Cash Out (Wallet → MoMo)</td><td>1.0%</td><td>GH₵ 10.00</td></tr>
+                                <tr><td>Bank → Wallet</td><td>0.5%</td><td>GH₵ 5.00</td></tr>
+                                <tr><td>Wallet → Bank</td><td>1.5%</td><td>GH₵ 15.00</td></tr>
+                                <tr><td>Currency Exchange</td><td>2.0%</td><td>GH₵ 20.00</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <h3>Revenue Opportunities</h3>
+                    <ul class="feature-list">
+                        <li>Transaction fees on every transfer</li>
+                        <li>FX spread on currency conversions</li>
+                        <li>Bill payment commissions</li>
+                        <li>Virtual card issuance fees</li>
+                        <li>Cash-out commissions (agent network)</li>
+                        <li>Premium tier subscriptions</li>
+                    </ul>
+
+                    <div style="height: 20px;"></div>
+
+                    <h3>Bank Control</h3>
+                    <ul class="feature-list">
+                        <li>Set custom fees per transaction type</li>
+                        <li>Different rates per KYC tier</li>
+                        <li>Promotional fee waivers</li>
+                        <li>Real-time fee adjustment via config</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════ SLIDE 10: PWA ════════════════════ -->
+        <div class="slide" id="slide-10">
+            <div class="slide-tag">Distribution</div>
+            <div class="slide-title">No app store. <span class="accent">No barriers.</span></div>
+            <div class="slide-subtitle">Progressive Web App — install from the browser, works on any device.</div>
+
+            <div class="grid-2">
+                <div>
+                    <h3>PWA Benefits for Banks</h3>
+                    <ul class="feature-list">
+                        <li>No Apple / Google app store approval needed</li>
+                        <li>Deploy instantly — update in real-time</li>
+                        <li>Works on iOS, Android, Windows, macOS</li>
+                        <li>~200KB initial load (vs 50MB native app)</li>
+                        <li>Runs on low-end smartphones</li>
+                        <li>Offline capability via Service Worker</li>
+                        <li>Push notifications supported</li>
+                        <li>Installable — appears on home screen</li>
+                    </ul>
+                </div>
+                <div class="grid-2" style="gap: 16px;">
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">App Store Fees</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Review Wait Time</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">~200</div>
+                        <div class="stat-label">KB Initial Load</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">∞</div>
+                        <div class="stat-label">Device Compatibility</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════ SLIDE 11: TIMELINE ════════════════════ -->
+        <div class="slide" id="slide-11">
+            <div class="slide-tag">Implementation</div>
+            <div class="slide-title">Live in <span class="accent">4 weeks</span></div>
+            <div class="slide-subtitle">From contract signing to your branded app in production.</div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot">1</div>
+                    <div class="timeline-week">Week 1</div>
+                    <div class="timeline-title">Branding & Config</div>
+                    <div class="timeline-desc">Logo, colors, fonts, fee schedule, language selection</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">2</div>
+                    <div class="timeline-week">Week 2</div>
+                    <div class="timeline-title">Gateway Setup</div>
+                    <div class="timeline-desc">Paystack, Flutterwave, Hubtel credentials + agent network</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">3</div>
+                    <div class="timeline-week">Week 3</div>
+                    <div class="timeline-title">Testing & QA</div>
+                    <div class="timeline-desc">End-to-end transaction testing, security audit, load testing</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">4</div>
+                    <div class="timeline-week">Week 4</div>
+                    <div class="timeline-title">Sandbox + Go Live</div>
+                    <div class="timeline-desc">BoG sandbox approval, deploy to production, staff training</div>
+                </div>
+            </div>
+
+            <div style="height: 40px;"></div>
+
+            <div class="grid-3">
+                <div class="stat-card">
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">Weeks to Launch</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">80%</div>
+                    <div class="stat-label">Less Dev Cost vs Custom</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">24/7</div>
+                    <div class="stat-label">Technical Support</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════ SLIDE 12: CTA ════════════════════ -->
+        <div class="slide" id="slide-12" style="justify-content: center; align-items: center; text-align: center;">
+            <div class="slide-tag" style="display: inline-block;">Let's Build Together</div>
+            <div class="cta-title">
+                <span style="color: var(--white);">Ready to launch</span><br>
+                <span style="color: var(--cyan);">your digital payment platform?</span>
+            </div>
+            <div class="cta-subtitle">
+                ClinoCash is ready for white-label deployment.<br>
+                Your brand. Your fees. Your market. Our technology.
+            </div>
+            <div class="cta-buttons">
+                <button class="cta-btn cta-primary">Schedule a Demo</button>
+                <button class="cta-btn cta-secondary">Technical Deep-Dive</button>
+            </div>
+            <div style="margin-top: 60px; display: flex; gap: 60px; justify-content: center;">
+                <div class="cover-meta-item">
+                    <div class="cover-meta-label">Platform</div>
+                    <div class="cover-meta-value">ClinoCash by Noecramos</div>
+                </div>
+                <div class="cover-meta-item">
+                    <div class="cover-meta-label">Contact</div>
+                    <div class="cover-meta-value">Commercial Department</div>
+                </div>
+                <div class="cover-meta-item">
+                    <div class="cover-meta-label">Compliance</div>
+                    <div class="cover-meta-value">BoG Emtech Sandbox</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 12;
+
+        function showSlide(n) {
+            const prev = document.querySelector('.slide.active');
+            const next = document.getElementById(`slide-${n}`);
+            if (!next || prev === next) return;
+
+            if (prev) {
+                prev.classList.remove('active');
+                prev.classList.add('prev');
+                setTimeout(() => prev.classList.remove('prev'), 500);
+            }
+
+            next.classList.add('active');
+            currentSlide = n;
+
+            document.getElementById('currentSlide').textContent = String(n).padStart(2, '0');
+            document.getElementById('progressBar').style.width = `${(n / totalSlides) * 100}%`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) showSlide(currentSlide - 1);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                nextSlide();
+            }
+            if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        // Touch swipe support
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+        document.addEventListener('touchend', (e) => {
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) nextSlide();
+                else prevSlide();
+            }
+        });
+
+        // Initialize
+        document.getElementById('totalSlides').textContent = totalSlides;
+        document.getElementById('progressBar').style.width = `${(1 / totalSlides) * 100}%`;
+    </script>
+</body>
+</html>
+]]>

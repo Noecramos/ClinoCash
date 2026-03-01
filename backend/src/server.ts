@@ -9,6 +9,7 @@ import authRoutes from './modules/auth/auth.routes';
 import walletRoutes from './modules/wallet/wallet.routes';
 import transactionRoutes from './modules/transaction/transaction.routes';
 import paymentRoutes from './modules/payment/payment.routes';
+import emtechRoutes from './modules/payment/emtech.routes';
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/wallets', walletRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/regulatory', emtechRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

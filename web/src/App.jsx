@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
 import { t, getGreeting, formatCurrency, formatCurrencyParts } from './i18n';
 import { Html5Qrcode } from 'html5-qrcode';
+import { auth as authAPI, wallets as walletsAPI, transactions as txnAPI, users as usersAPI, getToken, clearSession, getStoredUser, checkHealth } from './api';
 
 // ─── HAPTIC FEEDBACK ───────────────────────────────────
 
@@ -676,7 +677,7 @@ function TransactionList({ transactions, locale, onTxnClick }) {
   );
 }
 
-function SendMoneyModal({ onClose, locale, wallets }) {
+function SendMoneyModal({ onClose, locale, wallets, onTransferComplete }) {
   const [step, setStep] = useState(1);
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
@@ -684,12 +685,61 @@ function SendMoneyModal({ onClose, locale, wallets }) {
   const [currency, setCurrency] = useState('GHS');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [sendError, setSendError] = useState('');
+  const [resolvedUser, setResolvedUser] = useState(null);
+  const [lookingUp, setLookingUp] = useState(false);
+
+  // Debounced user lookup
+  const lookupTimeout = useRef(null);
+  useEffect(() => {
+    if (!recipient || recipient.length < 2) {
+      setResolvedUser(null);
+      return;
+    }
+    setLookingUp(true);
+    clearTimeout(lookupTimeout.current);
+    lookupTimeout.current = setTimeout(async () => {
+      try {
+        const res = await usersAPI.lookup(recipient);
+        if (res.success && res.user) {
+          setResolvedUser(res.user);
+        } else if (res.success && res.users && res.users.length > 0) {
+          setResolvedUser(res.users[0]);
+        } else {
+          setResolvedUser(null);
+        }
+      } catch {
+        setResolvedUser(null);
+      }
+      setLookingUp(false);
+    }, 500);
+    return () => clearTimeout(lookupTimeout.current);
+  }, [recipient]);
 
   const handleSend = async () => {
     setSending(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    setSendError('');
+    try {
+      const isPhone = recipient.match(/^\+?\d{10,}$/);
+      const res = await txnAPI.sendP2P({
+        receiverUsername: isPhone ? undefined : recipient.replace(/^@/, ''),
+        receiverPhone: isPhone ? recipient : undefined,
+        receiverUserId: resolvedUser?.id,
+        amount: parseFloat(amount),
+        currency,
+        description: description || undefined,
+        idempotencyKey: `send-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      });
+      if (res.success) {
+        setSent(true);
+        onTransferComplete?.();
+      } else {
+        setSendError(res.error || 'Transfer failed');
+      }
+    } catch (err) {
+      setSendError('Network error — please try again');
+    }
     setSending(false);
-    setSent(true);
   };
 
   const fee = parseFloat(amount || 0) * 0.005;
@@ -710,7 +760,7 @@ function SendMoneyModal({ onClose, locale, wallets }) {
                 {t('sendSuccess', locale)}
               </div>
               <div className="empty-state-desc" style={{ marginTop: '8px' }}>
-                {formatCurrency(parseFloat(amount), currency, locale)} → {recipient}
+                {formatCurrency(parseFloat(amount), currency, locale)} → {resolvedUser?.displayName || recipient}
               </div>
               <button className="btn-pill btn-primary" style={{ marginTop: '24px' }} onClick={onClose}>
                 {Icons.check} Done
@@ -727,6 +777,23 @@ function SendMoneyModal({ onClose, locale, wallets }) {
                   onChange={e => setRecipient(e.target.value)}
                   id="send-recipient-input"
                 />
+                {lookingUp && <div style={{ fontSize: 'var(--text-xs)', color: 'var(--gray-400)', marginTop: '4px' }}>Looking up user...</div>}
+                {resolvedUser && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px',
+                    padding: '8px 12px', background: 'var(--surface-card)', borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--green)',
+                  }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--cyan)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>
+                      {resolvedUser.displayName?.charAt(0) || '?'}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>{resolvedUser.displayName}</div>
+                      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--gray-400)' }}>@{resolvedUser.username}</div>
+                    </div>
+                    <div style={{ marginLeft: 'auto', color: 'var(--green)' }}>{Icons.check}</div>
+                  </div>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">{t('amount', locale)}</label>
@@ -780,7 +847,7 @@ function SendMoneyModal({ onClose, locale, wallets }) {
                   {t('sending', locale).replace('...', '')} {t('recipient', locale).toLowerCase()}
                 </div>
                 <div style={{ fontSize: 'var(--text-sm)', color: 'var(--white)', fontWeight: 600 }}>
-                  {recipient}
+                  {resolvedUser?.displayName || recipient}
                 </div>
               </div>
 
@@ -811,8 +878,14 @@ function SendMoneyModal({ onClose, locale, wallets }) {
                 </div>
               </div>
 
+              {sendError && (
+                <div style={{ color: 'var(--red)', fontSize: 'var(--text-sm)', textAlign: 'center', marginBottom: '12px', padding: '8px', background: 'rgba(239,68,68,0.1)', borderRadius: 'var(--radius-md)' }}>
+                  {sendError}
+                </div>
+              )}
+
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button className="btn-pill btn-secondary" onClick={() => setStep(1)} style={{ flex: 1 }}>
+                <button className="btn-pill btn-secondary" onClick={() => { setStep(1); setSendError(''); }} style={{ flex: 1 }}>
                   ← Back
                 </button>
                 <button
@@ -835,7 +908,42 @@ function SendMoneyModal({ onClose, locale, wallets }) {
 
 // ─── PAGES ─────────────────────────────────────────────
 
-function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick, onRequestClick, onSavingsClick, onFindAgent, onTxnClick, selectedCurrency, onCurrencyChange, balanceHidden, onToggleBalance }) {
+function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick, onRequestClick, onSavingsClick, onFindAgent, onTxnClick, selectedCurrency, onCurrencyChange, balanceHidden, onToggleBalance, onViewAll }) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef(null);
+
+  const isSearching = searchQuery.trim().length > 0;
+
+  const filteredTransactions = isSearching
+    ? transactions.filter(txn => {
+      const q = searchQuery.toLowerCase();
+      return (
+        txn.name?.toLowerCase().includes(q) ||
+        txn.username?.toLowerCase().includes(q) ||
+        txn.description?.toLowerCase().includes(q) ||
+        txn.type?.toLowerCase().includes(q) ||
+        String(txn.amount).includes(q) ||
+        txn.currency?.toLowerCase().includes(q)
+      );
+    })
+    : transactions.slice(0, 5);
+
+  // Escape key clears search
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === 'Escape' && searchQuery) {
+        setSearchQuery('');
+        searchInputRef.current?.blur();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [searchQuery]);
+
+  const resultLabel = locale === 'fr'
+    ? `${filteredTransactions.length} résultat${filteredTransactions.length !== 1 ? 's' : ''}`
+    : `${filteredTransactions.length} result${filteredTransactions.length !== 1 ? 's' : ''}`;
+
   return (
     <>
       <BalanceCard
@@ -861,13 +969,62 @@ function HomePage({ locale, wallets, transactions, onSendClick, onPayBillsClick,
       {/* Mini Statement */}
       <MiniStatement transactions={transactions} locale={locale} />
 
-      {/* Recent Transactions */}
+      {/* Recent Transactions Header */}
       <div className="section-header">
         <h2 className="section-title">{t('recentTransactions', locale)}</h2>
-        <button className="section-link">{t('viewAll', locale)}</button>
+        <button className="section-link" onClick={onViewAll}>{t('viewAll', locale)}</button>
       </div>
 
-      <TransactionList transactions={transactions.slice(0, 5)} locale={locale} onTxnClick={onTxnClick} />
+      {/* Transaction Search */}
+      <div className="txn-search-wrap">
+        <span className="txn-search-icon">{Icons.search}</span>
+        <input
+          ref={searchInputRef}
+          id="txn-search-input"
+          className="txn-search-input"
+          type="text"
+          placeholder={locale === 'fr' ? 'Rechercher une transaction…' : 'Search transactions…'}
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          autoComplete="off"
+          spellCheck={false}
+        />
+        {isSearching && (
+          <button
+            className="txn-search-clear"
+            onClick={() => { setSearchQuery(''); searchInputRef.current?.focus(); }}
+            aria-label="Clear search"
+          >
+            {Icons.close}
+          </button>
+        )}
+      </div>
+
+      {/* Result count badge */}
+      {isSearching && (
+        <div className="txn-search-meta">
+          <span className="txn-search-count">{resultLabel}</span>
+          {filteredTransactions.length > 0 && (
+            <span className="txn-search-hint">
+              {locale === 'fr' ? '— Appuyez sur Échap pour effacer' : '— Press Esc to clear'}
+            </span>
+          )}
+        </div>
+      )}
+
+      {filteredTransactions.length === 0 && isSearching ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">🔍</div>
+          <div className="empty-state-title">{locale === 'fr' ? 'Aucun résultat' : 'No results found'}</div>
+          <div className="empty-state-desc">
+            {locale === 'fr'
+              ? `Aucune transaction pour « ${searchQuery} »`
+              : `No transactions match "${searchQuery}"`}
+          </div>
+        </div>
+      ) : (
+        <TransactionList transactions={filteredTransactions} locale={locale} onTxnClick={onTxnClick} />
+      )}
     </>
   );
 }
@@ -1393,7 +1550,7 @@ function CardsPage({ locale, user }) {
   );
 }
 
-function ProfilePage({ locale, user, onLocaleChange, theme, onThemeChange }) {
+function ProfilePage({ locale, user, onLocaleChange, theme, onThemeChange, onLogout }) {
   const menuItems = [
     { icon: Icons.profile, label: t('personalInfo', locale) },
     { icon: Icons.shield, label: t('security', locale) },
@@ -1452,7 +1609,7 @@ function ProfilePage({ locale, user, onLocaleChange, theme, onThemeChange }) {
 
         <div className="profile-menu-divider" style={{ margin: '16px 24px' }} />
 
-        <div className="profile-menu-item" style={{ color: 'var(--red)' }}>
+        <div className="profile-menu-item" style={{ color: 'var(--red)', cursor: 'pointer' }} onClick={onLogout}>
           <div className="profile-menu-icon" style={{ color: 'var(--red)' }}>{Icons.logOut}</div>
           <span className="profile-menu-label" style={{ color: 'var(--red)' }}>{t('logout', locale)}</span>
         </div>
@@ -2094,12 +2251,26 @@ function TransactionDetailModal({ txn, locale, onClose }) {
 
 // ─── PIN LOCK SCREEN ───────────────────────────────────
 
-function PinLockScreen({ locale, onUnlock }) {
+function PinLockScreen({ locale, onUnlock, onRegister }) {
+  const [mode, setMode] = useState('login'); // login | register
+  const [phone, setPhone] = useState('');
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [shake, setShake] = useState(false);
   const [bioAvailable, setBioAvailable] = useState(false);
-  const CORRECT_PIN = '1234';
+  const [loading, setLoading] = useState(false);
+  // Registration fields
+  const [regUsername, setRegUsername] = useState('');
+  const [regDisplayName, setRegDisplayName] = useState('');
+  const [backendOnline, setBackendOnline] = useState(null);
+
+  // Check backend health on mount
+  useEffect(() => {
+    checkHealth().then(ok => setBackendOnline(ok));
+  }, []);
+
+  const CORRECT_PIN = '1234'; // Fallback for offline mode
 
   // Check if biometrics are available
   useEffect(() => {
@@ -2148,16 +2319,73 @@ function PinLockScreen({ locale, onUnlock }) {
   const handleDigit = (digit) => {
     haptic(10);
     setError(false);
+    setErrorMsg('');
     const newPin = pin + digit;
     setPin(newPin);
 
     if (newPin.length === 4) {
-      if (newPin === CORRECT_PIN) {
+      handlePinComplete(newPin);
+    }
+  };
+
+  const handlePinComplete = async (enteredPin) => {
+    if (backendOnline && phone) {
+      // Real login
+      setLoading(true);
+      try {
+        if (mode === 'register') {
+          if (!regUsername || !regDisplayName) {
+            setError(true);
+            setErrorMsg('Fill in all fields above');
+            setPin('');
+            setLoading(false);
+            return;
+          }
+          const res = await authAPI.register({
+            phone,
+            username: regUsername,
+            displayName: regDisplayName,
+            pin: enteredPin,
+            locale,
+          });
+          if (res.success) {
+            haptic([50, 30, 50]);
+            setTimeout(() => onUnlock(res.user), 300);
+          } else {
+            haptic([100, 50, 100]);
+            setError(true);
+            setErrorMsg(res.error || 'Registration failed');
+            setShake(true);
+            setTimeout(() => { setPin(''); setShake(false); }, 600);
+          }
+        } else {
+          const res = await authAPI.login(phone, enteredPin);
+          if (res.success) {
+            haptic([50, 30, 50]);
+            setTimeout(() => onUnlock(res.user), 300);
+          } else {
+            haptic([100, 50, 100]);
+            setError(true);
+            setErrorMsg(res.error || 'Invalid PIN');
+            setShake(true);
+            setTimeout(() => { setPin(''); setShake(false); }, 600);
+          }
+        }
+      } catch {
+        setError(true);
+        setErrorMsg('Network error');
+        setPin('');
+      }
+      setLoading(false);
+    } else {
+      // Offline fallback
+      if (enteredPin === CORRECT_PIN) {
         haptic([50, 30, 50]);
         setTimeout(() => onUnlock(), 300);
       } else {
         haptic([100, 50, 100]);
         setError(true);
+        setErrorMsg(t('wrongPin', locale));
         setShake(true);
         setTimeout(() => { setPin(''); setShake(false); }, 600);
       }
@@ -2176,8 +2404,50 @@ function PinLockScreen({ locale, onUnlock }) {
     <div className="pin-lock-screen">
       <div className="pin-lock-content">
         <img src="/logo.png" alt="ClinoCash" className="pin-logo" />
-        <h2 className="pin-title">{t('enterPin', locale)}</h2>
-        <p className="pin-subtitle">{t('pinSubtitle', locale)}</p>
+        <h2 className="pin-title">{mode === 'register' ? (locale === 'fr' ? 'Créer un Compte' : 'Create Account') : t('enterPin', locale)}</h2>
+
+        {backendOnline !== null && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '8px', fontSize: '11px', color: backendOnline ? 'var(--green)' : 'var(--gray-400)' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: backendOnline ? 'var(--green)' : '#888', display: 'inline-block' }} />
+            {backendOnline ? 'Connected to server' : 'Offline mode'}
+          </div>
+        )}
+
+        {/* Phone input */}
+        {backendOnline && (
+          <div style={{ marginBottom: '16px', width: '100%', maxWidth: '260px' }}>
+            <input
+              className="form-input"
+              type="tel"
+              placeholder={locale === 'fr' ? 'Numéro de téléphone' : 'Phone number'}
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              style={{ textAlign: 'center', fontSize: '16px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '12px' }}
+            />
+          </div>
+        )}
+
+        {/* Registration fields */}
+        {mode === 'register' && backendOnline && (
+          <div style={{ marginBottom: '12px', width: '100%', maxWidth: '260px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <input
+              className="form-input"
+              placeholder={locale === 'fr' ? 'Nom d\'utilisateur' : 'Username'}
+              value={regUsername}
+              onChange={e => setRegUsername(e.target.value)}
+              style={{ textAlign: 'center', fontSize: '14px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '10px' }}
+            />
+            <input
+              className="form-input"
+              placeholder={locale === 'fr' ? 'Nom complet' : 'Full name'}
+              value={regDisplayName}
+              onChange={e => setRegDisplayName(e.target.value)}
+              style={{ textAlign: 'center', fontSize: '14px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '10px' }}
+            />
+          </div>
+        )}
+
+        <p className="pin-subtitle">{!backendOnline ? t('pinSubtitle', locale) : (mode === 'register' ? (locale === 'fr' ? 'Choisissez un NIP à 4 chiffres' : 'Choose a 4-digit PIN') : t('pinSubtitle', locale))}</p>
 
         {/* PIN dots */}
         <div className={`pin-dots ${shake ? 'shake' : ''}`}>
@@ -2186,16 +2456,17 @@ function PinLockScreen({ locale, onUnlock }) {
           ))}
         </div>
 
-        {error && <p className="pin-error">{t('wrongPin', locale)}</p>}
+        {loading && <p style={{ color: 'var(--cyan)', fontSize: '13px', marginTop: '8px' }}>{locale === 'fr' ? 'Connexion...' : 'Connecting...'}</p>}
+        {error && <p className="pin-error">{errorMsg || t('wrongPin', locale)}</p>}
 
         {/* Numpad */}
         <div className="pin-numpad">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-            <button key={n} className="pin-key" onClick={() => handleDigit(String(n))}>
+            <button key={n} className="pin-key" onClick={() => handleDigit(String(n))} disabled={loading}>
               {n}
             </button>
           ))}
-          <button className="pin-key pin-bio" onClick={handleBiometric} title={t('useBiometrics', locale)}>
+          <button className="pin-key pin-bio" onClick={handleBiometric} title={t('useBiometrics', locale)} disabled={loading}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18.9 7a8 8 0 0 0-2.2-2.5" /><path d="M3.9 12a8 8 0 0 1 2.2-5.5" />
               <path d="M12 20a8 8 0 0 0 6.9-4" /><path d="M12 12a4 4 0 0 0-4 4" />
@@ -2203,15 +2474,25 @@ function PinLockScreen({ locale, onUnlock }) {
               <circle cx="12" cy="12" r="1" fill="currentColor" />
             </svg>
           </button>
-          <button className="pin-key" onClick={() => handleDigit('0')}>
+          <button className="pin-key" onClick={() => handleDigit('0')} disabled={loading}>
             0
           </button>
-          <button className="pin-key pin-delete" onClick={handleDelete}>
+          <button className="pin-key pin-delete" onClick={handleDelete} disabled={loading}>
             ⌫
           </button>
         </div>
 
-        <button className="pin-forgot" onClick={hapticClick(onUnlock)}>
+        {/* Mode toggle */}
+        {backendOnline && (
+          <button className="pin-forgot" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setPin(''); setError(false); setErrorMsg(''); }}>
+            {mode === 'login'
+              ? (locale === 'fr' ? 'Pas de compte ? Inscription' : 'No account? Register')
+              : (locale === 'fr' ? 'Déjà un compte ? Connexion' : 'Have an account? Login')
+            }
+          </button>
+        )}
+
+        <button className="pin-forgot" onClick={hapticClick(() => onUnlock())}>
           {t('forgotPin', locale)}
         </button>
 
@@ -2246,6 +2527,66 @@ function App() {
   const [pinLocked, setPinLocked] = useState(true);
   const [selectedTxn, setSelectedTxn] = useState(null);
 
+  // ─── LIVE DATA STATE ──────────────────────────────────
+  const [currentUser, setCurrentUser] = useState(null);
+  const [liveWallets, setLiveWallets] = useState(null);
+  const [liveTransactions, setLiveTransactions] = useState(null);
+  const [dataLoading, setDataLoading] = useState(false);
+
+  // Derive the actual data to use (live or mock fallback)
+  const user = currentUser || MOCK_USER;
+  const userWithInitials = { ...user, avatarInitials: user.displayName ? user.displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U' };
+  const activeWallets = liveWallets || MOCK_WALLETS;
+  const activeTransactions = liveTransactions || MOCK_TRANSACTIONS;
+
+  // ─── FETCH LIVE DATA ──────────────────────────────────
+  const fetchLiveData = useCallback(async () => {
+    if (!getToken()) return;
+    setDataLoading(true);
+    try {
+      // Fetch wallets
+      const walletsRes = await walletsAPI.getAll();
+      if (walletsRes.success && walletsRes.wallets) {
+        setLiveWallets(walletsRes.wallets.map(w => ({
+          id: w.id,
+          currency: w.currency,
+          balance: typeof w.balance === 'number' ? w.balance : parseFloat(w.balance),
+          status: w.status,
+        })));
+      }
+
+      // Fetch transactions
+      const txnRes = await txnAPI.getHistory({ limit: 50 });
+      if (txnRes.success && txnRes.transactions) {
+        setLiveTransactions(txnRes.transactions.map(tx => {
+          const isSender = tx.senderUserId === user.id;
+          return {
+            id: tx.id,
+            type: tx.type,
+            direction: isSender ? 'sent' : 'received',
+            name: isSender ? (tx.receiver?.displayName || 'Unknown') : (tx.sender?.displayName || 'System'),
+            username: isSender ? (tx.receiver ? `@${tx.receiver.username}` : '') : (tx.sender ? `@${tx.sender.username}` : ''),
+            amount: typeof tx.amount === 'number' ? tx.amount : parseFloat(tx.amount),
+            currency: tx.currency,
+            status: tx.status,
+            date: new Date(tx.completedAt || tx.createdAt),
+            description: tx.description || '',
+            fee: typeof tx.fee === 'number' ? tx.fee : parseFloat(tx.fee || 0),
+          };
+        }));
+      }
+
+      // Fetch profile
+      const profileRes = await authAPI.getProfile();
+      if (profileRes.success && profileRes.user) {
+        setCurrentUser(profileRes.user);
+      }
+    } catch (err) {
+      console.log('[ClinoCash] Could not fetch live data, using mock fallback');
+    }
+    setDataLoading(false);
+  }, [user.id]);
+
   // Apply theme to document
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -2263,6 +2604,18 @@ function App() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
+  // Listen for auth expiry
+  useEffect(() => {
+    const handler = () => {
+      setCurrentUser(null);
+      setLiveWallets(null);
+      setLiveTransactions(null);
+      setPinLocked(true);
+    };
+    window.addEventListener('clinocash:auth-expired', handler);
+    return () => window.removeEventListener('clinocash:auth-expired', handler);
+  }, []);
+
   const handleInstall = async () => {
     if (!installPrompt) return;
     installPrompt.prompt();
@@ -2272,6 +2625,24 @@ function App() {
     }
     setInstallPrompt(null);
   };
+
+  const handleUnlock = useCallback((userData) => {
+    setPinLocked(false);
+    if (userData) {
+      setCurrentUser(userData);
+      setLocale(userData.locale || 'en');
+    }
+    // Fetch live data after unlock
+    setTimeout(() => fetchLiveData(), 100);
+  }, [fetchLiveData]);
+
+  const handleLogout = useCallback(() => {
+    clearSession();
+    setCurrentUser(null);
+    setLiveWallets(null);
+    setLiveTransactions(null);
+    setPinLocked(true);
+  }, []);
 
   const tabs = [
     { id: 'home', label: t('home', locale), icon: Icons.home },
@@ -2292,8 +2663,8 @@ function App() {
         return (
           <HomePage
             locale={locale}
-            wallets={MOCK_WALLETS}
-            transactions={MOCK_TRANSACTIONS}
+            wallets={activeWallets}
+            transactions={activeTransactions}
             onSendClick={() => setShowSendModal(true)}
             onPayBillsClick={() => setShowBillsPage(true)}
             onRequestClick={() => setShowRequestModal(true)}
@@ -2304,24 +2675,25 @@ function App() {
             onCurrencyChange={setSelectedCurrency}
             balanceHidden={balanceHidden}
             onToggleBalance={() => setBalanceHidden(!balanceHidden)}
+            onViewAll={() => setActiveTab('activity')}
           />
         );
       case 'activity':
-        return <ActivityPage locale={locale} transactions={MOCK_TRANSACTIONS} onTxnClick={setSelectedTxn} />;
+        return <ActivityPage locale={locale} transactions={activeTransactions} onTxnClick={setSelectedTxn} />;
       case 'scan':
-        return <ScanPage locale={locale} user={MOCK_USER} />;
+        return <ScanPage locale={locale} user={userWithInitials} />;
       case 'cards':
-        return <CardsPage locale={locale} user={MOCK_USER} />;
+        return <CardsPage locale={locale} user={userWithInitials} />;
       case 'profile':
-        return <ProfilePage locale={locale} user={MOCK_USER} onLocaleChange={setLocale} theme={theme} onThemeChange={setTheme} />;
+        return <ProfilePage locale={locale} user={userWithInitials} onLocaleChange={setLocale} theme={theme} onThemeChange={setTheme} onLogout={handleLogout} />;
       default:
         return null;
     }
   };
 
-  // PIN Lock Screen
+  // PIN Lock / Login Screen
   if (pinLocked && !showOnboarding) {
-    return <PinLockScreen locale={locale} onUnlock={() => setPinLocked(false)} />;
+    return <PinLockScreen locale={locale} onUnlock={handleUnlock} />;
   }
 
   return (
@@ -2332,10 +2704,11 @@ function App() {
           <img src="/logo.png" alt="ClinoCash" className="header-logo" />
           <div className="header-greeting">
             <span>{getGreeting(locale)}</span>
-            <span>{MOCK_USER.displayName.split(' ')[0]}</span>
+            <span>{userWithInitials.displayName?.split(' ')[0] || 'User'}</span>
           </div>
         </div>
         <div className="header-right">
+          {dataLoading && <div style={{ width: '14px', height: '14px', border: '2px solid var(--cyan)', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', marginRight: '4px' }} />}
           <button className="header-icon-btn" onClick={() => setBalanceHidden(!balanceHidden)} id="toggle-balance-btn">
             {balanceHidden ? Icons.eyeOff : Icons.eye}
           </button>
@@ -2404,7 +2777,8 @@ function App() {
         <SendMoneyModal
           onClose={() => setShowSendModal(false)}
           locale={locale}
-          wallets={MOCK_WALLETS}
+          wallets={activeWallets}
+          onTransferComplete={fetchLiveData}
         />
       )}
 
@@ -2425,7 +2799,7 @@ function App() {
 
       {/* Request Money */}
       {showRequestModal && (
-        <RequestMoneyModal locale={locale} user={MOCK_USER} onClose={() => setShowRequestModal(false)} />
+        <RequestMoneyModal locale={locale} user={userWithInitials} onClose={() => setShowRequestModal(false)} />
       )}
 
       {/* Savings Goals */}

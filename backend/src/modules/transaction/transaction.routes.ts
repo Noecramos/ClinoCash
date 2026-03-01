@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { authenticate, AuthRequest } from '../../middleware/auth';
 import { transferMoney, getTransactionHistory, getTransactionByReference } from './transaction.service';
 import { Currency, TransactionType } from '@prisma/client';
+import prisma from '../../config/database';
 
 const router = Router();
 
@@ -23,14 +24,31 @@ router.post('/p2p', authenticate, async (req: AuthRequest, res: Response): Promi
         const body = transferSchema.parse(req.body);
         const senderUserId = req.userId!;
 
-        // Resolve receiver
+        // Resolve receiver by userId, username, or phone
         let receiverUserId = body.receiverUserId;
+
+        if (!receiverUserId && body.receiverUsername) {
+            const cleaned = body.receiverUsername.trim().replace(/^@/, '').toLowerCase();
+            const user = await prisma.user.findUnique({
+                where: { username: cleaned },
+                select: { id: true },
+            });
+            if (user) receiverUserId = user.id;
+        }
+
+        if (!receiverUserId && body.receiverPhone) {
+            const user = await prisma.user.findUnique({
+                where: { phone: body.receiverPhone.trim() },
+                select: { id: true },
+            });
+            if (user) receiverUserId = user.id;
+        }
+
         if (!receiverUserId) {
-            // In a real app, look up by username or phone
             res.status(400).json({
                 success: false,
-                error: 'Receiver identification required',
-                code: 'MISSING_RECEIVER',
+                error: 'Recipient not found. Check the username or phone number.',
+                code: 'RECEIVER_NOT_FOUND',
             });
             return;
         }
@@ -63,6 +81,7 @@ router.post('/p2p', authenticate, async (req: AuthRequest, res: Response): Promi
         res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });
+
 
 // ─── TRANSACTION HISTORY ──────────────────────────────
 

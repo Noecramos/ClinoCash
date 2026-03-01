@@ -1,7 +1,7 @@
 import { Router, Response } from 'express';
 import { z } from 'zod';
 import { authenticate, AuthRequest } from '../../middleware/auth';
-import { sendOtp, verifyOtp, registerUser, loginWithPin, getUserProfile } from './auth.service';
+import { sendOtp, verifyOtp, registerUser, loginWithPin, getUserProfile, lookupUser } from './auth.service';
 
 const router = Router();
 
@@ -103,6 +103,22 @@ router.get('/profile', authenticate, async (req: AuthRequest, res: Response): Pr
             return;
         }
         res.json({ success: true, user: profile });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// ─── LOOKUP USER ──────────────────────────────────────
+
+router.get('/lookup', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const query = req.query.q as string;
+        if (!query || query.length < 2) {
+            res.status(400).json({ success: false, error: 'Query too short' });
+            return;
+        }
+        const result = await lookupUser(query);
+        res.json(result);
     } catch (error) {
         res.status(500).json({ success: false, error: 'Internal server error' });
     }

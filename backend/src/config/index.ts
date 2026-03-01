@@ -35,6 +35,14 @@ export const config = {
         },
     },
 
+    // Bank of Ghana — Emtech Regulatory Sandbox (v2.0)
+    emtech: {
+        baseUrl: process.env.EMTECH_BASE_URL || 'https://api.emtech.com/integration',
+        tokenUrl: process.env.EMTECH_TOKEN_URL || 'https://platform.com/finapp/api/v1/auth/token',
+        clientId: process.env.EMTECH_CLIENT_ID || '',
+        clientSecret: process.env.EMTECH_CLIENT_SECRET || '',
+    },
+
     // KYC transaction limits per tier (daily)
     kycLimits: {
         TIER_0: { daily: 500, single: 100 },    // GHS equivalent

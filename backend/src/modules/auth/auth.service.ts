@@ -188,3 +188,72 @@ export async function getUserProfile(userId: string) {
 
     return user;
 }
+
+/**
+ * Look up a user by username or phone number
+ * Used by the Send Money flow to resolve recipients
+ */
+export async function lookupUser(query: string) {
+    // Clean the query
+    const cleaned = query.trim().replace(/^@/, '').toLowerCase();
+
+    if (!cleaned || cleaned.length < 2) {
+        return { success: false, error: 'Search query too short' };
+    }
+
+    // Try exact match by username first
+    const byUsername = await prisma.user.findUnique({
+        where: { username: cleaned },
+        select: {
+            id: true,
+            username: true,
+            displayName: true,
+            avatarUrl: true,
+            phone: true,
+        },
+    });
+
+    if (byUsername) {
+        return { success: true, user: byUsername };
+    }
+
+    // Try exact match by phone
+    const byPhone = await prisma.user.findUnique({
+        where: { phone: cleaned },
+        select: {
+            id: true,
+            username: true,
+            displayName: true,
+            avatarUrl: true,
+            phone: true,
+        },
+    });
+
+    if (byPhone) {
+        return { success: true, user: byPhone };
+    }
+
+    // Fuzzy search by username (starts with)
+    const fuzzy = await prisma.user.findMany({
+        where: {
+            OR: [
+                { username: { startsWith: cleaned } },
+                { phone: { contains: cleaned } },
+                { displayName: { contains: cleaned, mode: 'insensitive' } },
+            ],
+        },
+        select: {
+            id: true,
+            username: true,
+            displayName: true,
+            avatarUrl: true,
+        },
+        take: 10,
+    });
+
+    if (fuzzy.length > 0) {
+        return { success: true, users: fuzzy };
+    }
+
+    return { success: false, error: 'No user found' };
+}
